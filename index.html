@@ -137,7 +137,7 @@
             <section class="relative overflow-hidden">
                 <div class="hidden md:block absolute inset-0 hero-split" aria-hidden="true"></div>
 
-                <div class="relative md:min-h-[600px] flex flex-col md:block">
+                <div class="relative md:min-h-[700px] flex flex-col md:block">
                     <!-- Text -->
                     <div class="hero-blue md:bg-none relative z-10 px-4 sm:px-6 lg:px-8 pt-10 pb-8 md:py-0 md:absolute md:inset-y-0 md:left-0 md:w-[62%] flex flex-col justify-end">
                         <!-- dekorace: rámeček s velkým K -->
@@ -149,13 +149,17 @@
                             <img src="logo.png" alt="" class="absolute inset-0 m-auto h-[170px] w-[170px] object-contain drop-shadow-xl">
                         </div>
 
-                        <div class="relative max-w-3xl md:pb-24 md:pl-0">
+                        <div class="relative max-w-3xl md:max-w-[calc(50vw-4rem)] md:pb-24 md:pl-0">
                             <p class="text-white font-display font-semibold uppercase text-sm md:text-base tracking-wide flex items-center gap-3">
-                                <span id="heroEyebrow">Výsledek zápasu</span>
+                                <span id="heroEyebrow">Aktualita</span><span class="text-white/40" aria-hidden="true">|</span><time datetime="2026-10-14">14. října 2026</time>
                             </p>
-                            <h1 id="heroTitle" class="mt-4 text-white font-display font-extrabold uppercase text-4xl sm:text-5xl lg:text-[64px] leading-[1.05] tracking-tight">
-                                Kaštánci porazili Real Dejvice 8:0
+                            <h1 id="heroTitle" class="mt-4 text-white font-display font-extrabold uppercase text-4xl sm:text-5xl md:text-[42px] lg:text-[46px] leading-[1.08] tracking-tight">
+                                Kaštánci zvítězili dnes proti &bdquo;Zápas zrušen B&ldquo; 12:1
                             </h1>
+                            <p id="heroNote" class="mt-4 text-white/90 text-lg sm:text-xl font-semibold">
+                                Čili teď jsou v Kozičce a slaví!!
+                                <span class="block text-sm font-medium text-white/65 mt-1">Data k zápasu ještě doplňujeme.</span>
+                            </p>
                             <div class="mt-7 flex flex-wrap items-center gap-3">
                                 <button type="button" data-tab="matches" class="pill rounded-full px-5 py-2.5 text-sm font-semibold inline-flex items-center gap-2">
                                     Celý přehled <i class="fa-solid fa-chevron-right text-[10px]"></i>
@@ -666,17 +670,6 @@
             });
         }
 
-        function renderHero() {
-            const last = matchesData[matchesData.length - 1];
-            if (!last) return;
-            const eyebrow = document.getElementById('heroEyebrow');
-            const title = document.getElementById('heroTitle');
-            if (eyebrow) eyebrow.textContent = 'Výsledek zápasu  |  ' + last.date;
-
-            const diff = last.scoreHome - last.scoreAway;
-            const verb = diff > 0 ? 'porazili' : diff < 0 ? 'podlehli' : 'remizovali s';
-            if (title) title.textContent = `${last.home} ${verb} ${last.away} ${last.scoreHome}:${last.scoreAway}`;
-        }
 
 
         // ---- Odpočet do dalšího zápasu (21. 10. 2026, 18:00 pražského času, letní čas = +02:00) ----
@@ -791,7 +784,6 @@
                 }
             } catch (e) {}
 
-            renderHero();
             startCountdown();
             filterPlayers();
             renderMatches();
