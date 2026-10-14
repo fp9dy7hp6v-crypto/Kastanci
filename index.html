@@ -97,9 +97,9 @@
                 <button type="button" data-tab="players" class="bg-bright hover:bg-royal transition-colors text-white rounded-full px-5 py-2.5 text-sm font-semibold flex items-center gap-2">
                     <i class="fa-solid fa-ranking-star"></i> Statistiky hráčů <i class="fa-solid fa-chevron-right text-[10px]"></i>
                 </button>
-                <button type="button" data-tab="matches" class="border border-white/70 hover:bg-white/10 transition-colors text-white rounded-full px-5 py-2.5 text-sm font-semibold flex items-center gap-2">
-                    <i class="fa-solid fa-calendar-days"></i> Zápasy <i class="fa-solid fa-chevron-right text-[10px]"></i>
-                </button>
+                <a href="https://strahovskaliga.cz/Liga/?LID=4" target="_blank" rel="noopener noreferrer" class="border border-white/70 hover:bg-white/10 transition-colors text-white rounded-full px-5 py-2.5 text-sm font-semibold flex items-center gap-2">
+                    <i class="fa-solid fa-table-list"></i> Tabulka 4. ligy <span aria-hidden="true">&#8599;</span>
+                </a>
             </div>
         </div>
     </header>
@@ -136,6 +136,9 @@
                                 <button type="button" data-tab="matches" class="pill rounded-full px-5 py-2.5 text-sm font-semibold inline-flex items-center gap-2">
                                     Celý přehled <i class="fa-solid fa-chevron-right text-[10px]"></i>
                                 </button>
+                                <a href="https://strahovskaliga.cz/Liga/?LID=4" target="_blank" rel="noopener noreferrer" class="pill rounded-full px-5 py-2.5 text-sm font-semibold inline-flex items-center gap-2">
+                                    Tabulka 4. ligy <span aria-hidden="true">&#8599;</span>
+                                </a>
                             </div>
                         </div>
 
@@ -344,6 +347,32 @@
                         </div>
                     </div>
                 </div>
+
+                <div>
+                    <h2 class="section-title font-display font-extrabold uppercase text-xl text-navy mb-5">Oficiální liga</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <a href="https://strahovskaliga.cz/Liga/?LID=4" target="_blank" rel="noopener noreferrer" class="group bg-navy text-white rounded-3xl p-6 flex items-center justify-between gap-4 hover:bg-royal transition-colors">
+                            <div class="min-w-0">
+                                <span class="text-[11px] font-extrabold uppercase tracking-wider text-white/70 block">Strahovská liga</span>
+                                <p class="font-display font-extrabold text-2xl uppercase mt-1">4. liga</p>
+                                <p class="text-sm text-white/75 mt-2">Aktuální tabulka, rozpis a výsledky všech týmů v naší soutěži.</p>
+                            </div>
+                            <span class="shrink-0 w-11 h-11 rounded-full border-2 border-white/80 flex items-center justify-center text-lg" aria-hidden="true">&#8599;</span>
+                        </a>
+                        <a href="https://strahovskaliga.cz/TymProfil/?TID=8832" target="_blank" rel="noopener noreferrer" class="group bg-mist border border-royal/15 rounded-3xl p-6 flex items-center justify-between gap-4 hover:border-royal transition-colors">
+                            <div class="flex items-center gap-4 min-w-0">
+                                <img src="logo.png" alt="" class="w-16 h-16 object-contain shrink-0">
+                                <div class="min-w-0">
+                                    <span class="text-[11px] font-extrabold uppercase tracking-wider text-royal block">Ligový profil týmu</span>
+                                    <p class="font-display font-extrabold text-2xl uppercase text-navy mt-1">Kaštánci</p>
+                                    <p class="text-sm text-slate-600 mt-2">Oficiální stránka týmu v 4. lize.</p>
+                                </div>
+                            </div>
+                            <span class="shrink-0 w-11 h-11 rounded-full border-2 border-royal text-royal flex items-center justify-center text-lg" aria-hidden="true">&#8599;</span>
+                        </a>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-3">Oficiální výsledky a tabulku vede liga na strahovskaliga.cz. Čísla na tomhle webu jsou naše vlastní evidence.</p>
+                </div>
             </div>
         </div>
 
@@ -390,6 +419,7 @@
                         <tbody id="playersTableBody" class="divide-y divide-slate-100"></tbody>
                     </table>
                 </div>
+                <p class="text-xs text-slate-500 pt-1">Oficiální ligové statistiky a zápisy najdeš na <a href="https://strahovskaliga.cz/TymProfil/?TID=8832" target="_blank" rel="noopener noreferrer" class="font-bold text-royal hover:text-navy">profilu týmu &#8599;</a></p>
             </div>
         </div>
 
@@ -404,6 +434,13 @@
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-4">
                 <h2 class="section-title font-display font-extrabold uppercase text-base text-navy">Přehled odehraných zápasů</h2>
                 <div id="matchesContainer" class="space-y-3"></div>
+                <div class="rounded-2xl bg-mist border border-royal/10 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <p class="text-sm text-slate-700">Oficiální rozpis a výsledky najdeš v lize na strahovskaliga.cz.</p>
+                    <div class="flex flex-wrap gap-2">
+                        <a href="https://strahovskaliga.cz/TymProfil/?TID=8832" target="_blank" rel="noopener noreferrer" class="bg-royal hover:bg-navy transition-colors text-white rounded-full px-4 py-2 text-xs font-bold uppercase tracking-wide">Profil Kaštánků &#8599;</a>
+                        <a href="https://strahovskaliga.cz/Liga/?LID=4" target="_blank" rel="noopener noreferrer" class="border border-royal text-royal hover:bg-royal hover:text-white transition-colors rounded-full px-4 py-2 text-xs font-bold uppercase tracking-wide">Tabulka 4. ligy &#8599;</a>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -412,7 +449,10 @@
     <footer class="bg-navy text-white/70 text-xs mt-10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex items-center justify-between">
             <span class="flex items-center gap-3 font-display font-extrabold uppercase tracking-wide text-white"><img src="logo.png" alt="" class="w-9 h-9 object-contain">Kaštánci</span>
-            <span>Sezóna 2025/2026</span>
+            <span class="flex items-center gap-4">
+                <a href="https://strahovskaliga.cz/Liga/?LID=4" target="_blank" rel="noopener noreferrer" class="hover:text-white font-semibold">4. liga &#8599;</a>
+                <a href="https://strahovskaliga.cz/TymProfil/?TID=8832" target="_blank" rel="noopener noreferrer" class="hover:text-white font-semibold">Profil týmu &#8599;</a>
+            </span>
         </div>
     </footer>
 
@@ -435,6 +475,9 @@
     </nav>
 
     <script>
+        const LEAGUE_URL = 'https://strahovskaliga.cz/Liga/?LID=4';
+        const TEAM_URL = 'https://strahovskaliga.cz/TymProfil/?TID=8832';
+
         const playersData = [
             { name: 'Raďas', matches: 2, goals: 4, assists: 0, points: 4, plusMinus: 6 },
             { name: 'Vojta', matches: 2, goals: 0, assists: 4, points: 4, plusMinus: 5 },
@@ -570,6 +613,7 @@
                         <span class="mx-4 font-display text-base sm:text-lg font-black px-4 py-1 bg-navy rounded-full text-white">${m.scoreHome} : ${m.scoreAway}</span>
                         <span class="text-sm font-semibold text-left flex-1 text-slate-600">${m.away}</span>
                     </div>
+                    <a href="${TEAM_URL}" target="_blank" rel="noopener noreferrer" class="text-xs font-bold uppercase tracking-wide text-royal hover:text-navy whitespace-nowrap">V lize &#8599;</a>
                 `;
                 container.appendChild(item);
             });
