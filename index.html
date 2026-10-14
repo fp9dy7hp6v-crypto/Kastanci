@@ -362,7 +362,7 @@
                             <button type="button" data-tab="players" class="text-xs font-bold text-royal hover:text-navy uppercase tracking-wide">Všichni hráči <i class="fa-solid fa-chevron-right text-[9px]"></i></button>
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                             <div class="p-4 rounded-2xl bg-mist border border-royal/10 flex items-center space-x-3">
                                 <div class="w-12 h-12 rounded-full bg-royal text-white flex items-center justify-center text-lg shrink-0">
                                     <i class="fa-solid fa-futbol"></i>
@@ -393,6 +393,16 @@
                                     <span class="text-[10px] font-extrabold uppercase tracking-wider text-royal block">Nejlepší +/-</span>
                                     <p class="text-sm font-extrabold text-navy truncate">Patrik</p>
                                     <p class="text-xs text-slate-500">+8 bodů</p>
+                                </div>
+                            </div>
+                            <div class="p-4 rounded-2xl bg-navy text-white flex items-center space-x-3">
+                                <div class="w-12 h-12 rounded-full bg-white text-navy flex items-center justify-center text-lg shrink-0">
+                                    <i class="fa-solid fa-beer-mug-empty"></i>
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-white/70 block">Šmakec král</span>
+                                    <p id="smakecLeaderName" class="text-sm font-extrabold truncate">&ndash;</p>
+                                    <p id="smakecLeaderValue" class="text-xs text-white/70"></p>
                                 </div>
                             </div>
                         </div>
@@ -446,9 +456,42 @@
                         <option value="goals">Řadit: Góly</option>
                         <option value="assists">Řadit: Asistence</option>
                         <option value="plusMinus">Řadit: +/- body</option>
+                        <option value="smakec">Řadit: Šmakec index</option>
                         <option value="matches">Řadit: Zápasy</option>
                     </select>
                 </div>
+
+                <details class="group bg-white border border-slate-200 shadow-sm rounded-2xl">
+                    <summary class="cursor-pointer list-none flex items-center justify-between gap-3 px-4 sm:px-5 py-4">
+                        <span class="section-title font-display font-extrabold uppercase text-sm text-navy">Šmakec index &ndash; jak se počítá</span>
+                        <span class="text-xs font-bold text-royal uppercase tracking-wide shrink-0">Zobrazit pravidla</span>
+                    </summary>
+                    <div class="px-4 sm:px-5 pb-5 space-y-5 text-sm text-slate-700">
+                        <p>Jednotný přepočet, který zohledňuje komplexitu hráče na hřišti i mimo něj.</p>
+                        <p class="font-display font-extrabold text-navy bg-mist rounded-xl px-4 py-3 text-sm sm:text-base">Šmakec index = (3 &middot; G + 2 &middot; A + (+/&minus;) + 4 &middot; RG) &times; násobič &minus; 4 &middot; pokuty</p>
+                        <div class="grid md:grid-cols-2 gap-5">
+                            <div>
+                                <h3 class="font-display font-extrabold uppercase text-xs tracking-wider text-royal mb-2">1. Sportovní základ (hřiště)</h3>
+                                <ul class="space-y-1.5">
+                                    <li><b class="text-navy">Gól:</b> 3 body</li>
+                                    <li><b class="text-navy">Asistence:</b> 2 body</li>
+                                    <li><b class="text-navy">+/&minus; body:</b> reálná bilance účasti na hřišti (např. +2 nebo &minus;1)</li>
+                                    <li><b class="text-navy">Rozhodující gól (RG):</b> +4 body navíc k běžnému gólu, autor vítězné trefy tedy získá z daného gólu celkem 7 bodů</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h3 class="font-display font-extrabold uppercase text-xs tracking-wider text-royal mb-2">2. Hospodský násobič &amp; pokuta (třetí poločas)</h3>
+                                <ul class="space-y-1.5">
+                                    <li><b class="text-navy">&times;1,0 Standard:</b> běžná účast v hospodě, body z hřiště zůstávají</li>
+                                    <li><b class="text-navy">&times;1,5 Aktivní Šmakec:</b> 6+ piv NEBO 4 panáky zelené</li>
+                                    <li><b class="text-navy">&times;2,0 Ultrašmakec (Fenin Mode):</b> 8+ piv NEBO série 6 panáků zelené za večer</li>
+                                    <li><b class="text-navy">Pokuta &minus;4 body:</b> odchod domů bez návštěvy hospody, odečítá se až od celkového výsledku</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500">Údaje z hospody a rozhodující góly zatím nejsou doplněné. Všichni hráči mají proto prozatím standardní násobič &times;1,0 a žádnou pokutu, takže index se rovná sportovnímu základu.</p>
+                    </div>
+                </details>
 
                 <!-- Mobilní karty -->
                 <div id="playersMobileList" class="grid grid-cols-1 sm:grid-cols-2 gap-3 md:hidden"></div>
@@ -465,6 +508,7 @@
                                 <th class="py-4 px-4 text-center">Asistence</th>
                                 <th class="py-4 px-4 text-center">Body (G+A)</th>
                                 <th class="py-4 px-4 text-center">+/-</th>
+                                <th class="py-4 px-4 text-center">Šmakec index</th>
                             </tr>
                         </thead>
                         <tbody id="playersTableBody" class="divide-y divide-slate-100"></tbody>
@@ -529,6 +573,33 @@
         const LEAGUE_URL = 'https://strahovskaliga.cz/Liga/?LID=4';
         const TEAM_URL = 'https://strahovskaliga.cz/TymProfil/?TID=8832';
 
+        // Šmakec index: (3·G + 2·A + (+/-) + 4·RG) × násobič − 4·pokuty
+        // Volitelná pole hráče (když chybí, počítá se výchozí hodnota):
+        //   decisiveGoals - počet rozhodujících gólů (výchozí 0)
+        //   multiplier    - hospodský násobič: 1 (standard), 1.5 (aktivní Šmakec), 2 (Ultrašmakec / Fenin Mode); výchozí 1
+        //   skipped       - kolikrát odešel domů bez návštěvy hospody (výchozí 0, každý případ -4 body)
+        const SMAKEC = { goal: 3, assist: 2, decisiveBonus: 4, penalty: 4 };
+
+        function smakecBase(p) {
+            return SMAKEC.goal * p.goals + SMAKEC.assist * p.assists + p.plusMinus + SMAKEC.decisiveBonus * (p.decisiveGoals || 0);
+        }
+
+        function smakecIndex(p) {
+            const value = smakecBase(p) * (p.multiplier || 1) - SMAKEC.penalty * (p.skipped || 0);
+            return Math.round(value * 10) / 10;
+        }
+
+        function formatNumber(v) {
+            return String(v).replace('.', ',').replace('-', '\u2212');
+        }
+
+        function smakecBadges(p) {
+            let out = '';
+            if ((p.multiplier || 1) !== 1) out += `<span class="ml-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-royal text-white">\u00d7${formatNumber(p.multiplier)}</span>`;
+            if (p.skipped) out += `<span class="ml-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-navy text-white">\u2212${SMAKEC.penalty * p.skipped}</span>`;
+            return out;
+        }
+
         const playersData = [
             { name: 'Raďas', matches: 2, goals: 4, assists: 0, points: 4, plusMinus: 6 },
             { name: 'Vojta', matches: 2, goals: 0, assists: 4, points: 4, plusMinus: 5 },
@@ -590,6 +661,7 @@
                     <td class="py-3.5 px-4 text-center font-bold text-navy">${p.assists}</td>
                     <td class="py-3.5 px-4 text-center font-black text-royal">${p.points}</td>
                     <td class="py-3.5 px-4 text-center font-bold text-navy">${formatPlusMinus(p.plusMinus)}</td>
+                    <td class="py-3.5 px-4 text-center whitespace-nowrap"><span class="font-display font-black text-base text-navy">${formatNumber(smakecIndex(p))}</span>${smakecBadges(p)}</td>
                 `;
                 tableBody.appendChild(row);
 
@@ -621,6 +693,10 @@
                             <span class="text-sm font-black text-navy">${formatPlusMinus(p.plusMinus)}</span>
                         </div>
                     </div>
+                    <div class="flex items-center justify-between bg-navy text-white rounded-xl px-3 py-2">
+                        <span class="text-[10px] uppercase tracking-wider font-bold text-white/70">Šmakec index</span>
+                        <span class="font-display font-black text-lg">${formatNumber(smakecIndex(p))}${smakecBadges(p)}</span>
+                    </div>
                 `;
                 mobileList.appendChild(card);
             });
@@ -639,11 +715,21 @@
                 if (sortBy === 'assists') return b.assists - a.assists || b.points - a.points;
                 if (sortBy === 'points') return b.points - a.points || b.goals - a.goals || b.plusMinus - a.plusMinus;
                 if (sortBy === 'plusMinus') return b.plusMinus - a.plusMinus || b.points - a.points;
+                if (sortBy === 'smakec') return smakecIndex(b) - smakecIndex(a) || b.points - a.points;
                 if (sortBy === 'matches') return b.matches - a.matches || b.points - a.points;
                 return 0;
             });
 
             renderPlayers(filtered);
+        }
+
+        function renderSmakecLeader() {
+            const best = [...playersData].sort((a, b) => smakecIndex(b) - smakecIndex(a) || b.points - a.points)[0];
+            const name = document.getElementById('smakecLeaderName');
+            const value = document.getElementById('smakecLeaderValue');
+            if (!best || !name || !value) return;
+            name.textContent = best.name;
+            value.textContent = formatNumber(smakecIndex(best)) + ' bodů Šmakec indexu';
         }
 
         function renderMatches() {
@@ -786,6 +872,7 @@
 
             startCountdown();
             filterPlayers();
+            renderSmakecLeader();
             renderMatches();
 
             const searchInput = document.getElementById('playerSearch');
