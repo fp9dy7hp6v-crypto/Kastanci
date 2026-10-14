@@ -6,6 +6,7 @@
     <title>Kaštánci - Statistiky</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="icon" type="image/png" href="logo.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -83,7 +84,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 md:h-[72px] flex items-center justify-between">
             <div class="flex items-center gap-8 h-full">
                 <button type="button" data-tab="overview" class="flex items-center gap-3 shrink-0">
-                    <span class="w-10 h-10 rounded-full bg-white flex items-center justify-center font-display font-black text-xl text-royal shadow-lg ring-2 ring-bright">K</span>
+                    <img src="logo.png" alt="TJ Kaštánci" class="w-12 h-12 object-contain drop-shadow-lg">
                     <span class="font-display font-extrabold text-white text-lg leading-none uppercase tracking-wide">Kaštánci</span>
                 </button>
                 <nav class="hidden md:flex items-stretch gap-7 h-full">
@@ -116,12 +117,12 @@
                     <!-- Text -->
                     <div class="hero-blue md:bg-none relative z-10 px-4 sm:px-6 lg:px-8 pt-10 pb-8 md:py-0 md:absolute md:inset-y-0 md:left-0 md:w-[62%] flex flex-col justify-end">
                         <!-- dekorace: rámeček s velkým K -->
-                        <div class="hidden md:block absolute left-8 top-10 w-[300px] h-[200px] opacity-40 pointer-events-none" aria-hidden="true">
-                            <span class="absolute left-0 top-0 w-12 h-12 border-t-2 border-l-2 border-white"></span>
-                            <span class="absolute right-0 top-0 w-12 h-12 border-t-2 border-r-2 border-white"></span>
-                            <span class="absolute left-0 bottom-0 w-12 h-12 border-b-2 border-l-2 border-white"></span>
-                            <span class="absolute right-0 bottom-0 w-12 h-12 border-b-2 border-r-2 border-white"></span>
-                            <span class="absolute inset-0 flex items-center justify-center font-display font-black text-[130px] leading-none text-white/80">K</span>
+                        <div class="hidden md:block absolute left-8 top-10 w-[300px] h-[200px] pointer-events-none" aria-hidden="true">
+                            <span class="absolute left-0 top-0 w-12 h-12 border-t-2 border-l-2 border-white/40"></span>
+                            <span class="absolute right-0 top-0 w-12 h-12 border-t-2 border-r-2 border-white/40"></span>
+                            <span class="absolute left-0 bottom-0 w-12 h-12 border-b-2 border-l-2 border-white/40"></span>
+                            <span class="absolute right-0 bottom-0 w-12 h-12 border-b-2 border-r-2 border-white/40"></span>
+                            <img src="logo.png" alt="" class="absolute inset-0 m-auto h-[170px] w-[170px] object-contain drop-shadow-xl">
                         </div>
 
                         <div class="relative max-w-3xl md:pb-24 md:pl-0">
@@ -184,8 +185,7 @@
                                 <path d="M178 312 Q220 392 262 312" fill="none" stroke="#fff" stroke-width="12" stroke-linecap="round"/>
                                 <!-- číslo a znak -->
                                 <text x="220" y="500" text-anchor="middle" font-family="Montserrat, Arial, sans-serif" font-weight="900" font-size="86" fill="#fff">10</text>
-                                <circle cx="330" cy="408" r="17" fill="#fff"/>
-                                <text x="330" y="415" text-anchor="middle" font-family="Montserrat, Arial, sans-serif" font-weight="900" font-size="20" fill="#0b4cd1">K</text>
+                                <image href="logo.png" x="306" y="384" width="48" height="48"/>
                                 <!-- uši -->
                                 <ellipse cx="156" cy="196" rx="10" ry="16" fill="#6b4229"/>
                                 <ellipse cx="284" cy="196" rx="10" ry="16" fill="#6b4229"/>
@@ -218,8 +218,7 @@
                                 <path d="M398 358 Q440 432 482 358" fill="none" stroke="#0b4cd1" stroke-width="12" stroke-linecap="round"/>
                                 <!-- číslo a znak -->
                                 <text x="440" y="522" text-anchor="middle" font-family="Montserrat, Arial, sans-serif" font-weight="900" font-size="80" fill="#0b4cd1">7</text>
-                                <circle cx="352" cy="452" r="17" fill="#0b4cd1"/>
-                                <text x="352" y="459" text-anchor="middle" font-family="Montserrat, Arial, sans-serif" font-weight="900" font-size="20" fill="#fff">K</text>
+                                <image href="logo.png" x="328" y="428" width="48" height="48"/>
                                 <!-- uši -->
                                 <ellipse cx="384" cy="244" rx="9" ry="15" fill="#e2ad86"/>
                                 <ellipse cx="496" cy="244" rx="9" ry="15" fill="#e2ad86"/>
@@ -412,7 +411,7 @@
 
     <footer class="bg-navy text-white/70 text-xs mt-10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex items-center justify-between">
-            <span class="font-display font-extrabold uppercase tracking-wide text-white">Kaštánci</span>
+            <span class="flex items-center gap-3 font-display font-extrabold uppercase tracking-wide text-white"><img src="logo.png" alt="" class="w-9 h-9 object-contain">Kaštánci</span>
             <span>Sezóna 2025/2026</span>
         </div>
     </footer>
