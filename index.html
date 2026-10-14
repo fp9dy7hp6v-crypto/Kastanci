@@ -489,9 +489,28 @@
                                 </ul>
                             </div>
                         </div>
-                        <p class="text-xs text-slate-500">Údaje z hospody a rozhodující góly zatím nejsou doplněné. Všichni hráči mají proto prozatím standardní násobič &times;1,0 a žádnou pokutu, takže index se rovná sportovnímu základu.</p>
+                        <p class="text-xs text-slate-500">Hospodská data a rozhodující góly zatím nejsou kompletní. Hráč bez záznamu má standardní násobič &times;1,0 a žádnou pokutu. Přerušovaný štítek &times;1,5? znamená, že hráč měl násobič jen v části zápasů a použije se, až budou známé jeho statistiky po zápasech.</p>
                     </div>
                 </details>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="bg-mist border border-royal/10 rounded-2xl p-4 sm:p-5">
+                        <span class="text-[11px] font-extrabold uppercase tracking-wider text-royal block">Aktivní Šmakec &middot; &times;1,5</span>
+                        <div class="flex items-baseline gap-3 mt-2">
+                            <span id="pubActiveTotal" class="font-display font-black text-4xl text-navy">0</span>
+                            <span class="text-xs text-slate-500">celkem v sezóně</span>
+                        </div>
+                        <p id="pubActiveNames" class="text-sm text-slate-700 mt-2"></p>
+                    </div>
+                    <div class="bg-navy text-white rounded-2xl p-4 sm:p-5">
+                        <span class="text-[11px] font-extrabold uppercase tracking-wider text-white/70 block">Ultrašmakec (Fenin Mode) &middot; &times;2,0</span>
+                        <div class="flex items-baseline gap-3 mt-2">
+                            <span id="pubUltraTotal" class="font-display font-black text-4xl">0</span>
+                            <span class="text-xs text-white/65">celkem v sezóně</span>
+                        </div>
+                        <p id="pubUltraNames" class="text-sm text-white/85 mt-2"></p>
+                    </div>
+                </div>
 
                 <!-- Mobilní karty -->
                 <div id="playersMobileList" class="grid grid-cols-1 sm:grid-cols-2 gap-3 md:hidden"></div>
@@ -509,6 +528,8 @@
                                 <th class="py-4 px-4 text-center">Body (G+A)</th>
                                 <th class="py-4 px-4 text-center">+/-</th>
                                 <th class="py-4 px-4 text-center">Šmakec index</th>
+                                <th class="py-4 px-4 text-center">Aktivní šmakec</th>
+                                <th class="py-4 px-4 text-center">Ultrašmakec</th>
                             </tr>
                         </thead>
                         <tbody id="playersTableBody" class="divide-y divide-slate-100"></tbody>
@@ -574,19 +595,52 @@
         const TEAM_URL = 'https://strahovskaliga.cz/TymProfil/?TID=8832';
 
         // Šmakec index: (3·G + 2·A + (+/-) + 4·RG) × násobič − 4·pokuty
-        // Volitelná pole hráče (když chybí, počítá se výchozí hodnota):
-        //   decisiveGoals - počet rozhodujících gólů (výchozí 0)
-        //   multiplier    - hospodský násobič: 1 (standard), 1.5 (aktivní Šmakec), 2 (Ultrašmakec / Fenin Mode); výchozí 1
-        //   skipped       - kolikrát odešel domů bez návštěvy hospody (výchozí 0, každý případ -4 body)
+        // Volitelná pole hráče:
+        //   decisiveGoals - počet rozhodujících gólů celkem (výchozí 0)
+        //   pub           - třetí poločas po zápasech: { číslo zápasu: 'standard' | 'active' | 'ultra' | 'none' }
+        //                   standard = ×1,0 · active = Aktivní Šmakec ×1,5 · ultra = Ultrašmakec ×2,0 · none = domů bez hospody (-4)
+        //                   Hráč bez záznamu má standard.
+        //   log           - volitelný rozpis po zápasech [{ match, goals, assists, plusMinus, decisiveGoals }].
+        //                   Když existuje, násobič se použije přesně na každý zápas zvlášť.
         const SMAKEC = { goal: 3, assist: 2, decisiveBonus: 4, penalty: 4 };
+        const TIER_MULT = { standard: 1, active: 1.5, ultra: 2, none: 1 };
 
         function smakecBase(p) {
             return SMAKEC.goal * p.goals + SMAKEC.assist * p.assists + p.plusMinus + SMAKEC.decisiveBonus * (p.decisiveGoals || 0);
         }
 
+        function pubCount(p, tier) {
+            return Object.values(p.pub || {}).filter(t => t === tier).length;
+        }
+
+        // Vrací { value, mult, penalty, pending }
+        // pending = hráč má násobič jen v části zápasů a chybí rozpis po zápasech, násobič se zatím nepoužije
+        function smakecDetail(p) {
+            const pub = p.pub || {};
+            const tiers = Object.values(pub);
+            const penalty = SMAKEC.penalty * pubCount(p, 'none');
+            let value, mult = 1, pending = false;
+
+            if (p.log) {
+                value = p.log.reduce((sum, m) => sum + smakecBase(m) * TIER_MULT[pub[m.match] || 'standard'], 0);
+                mult = Math.max(1, ...p.log.map(m => TIER_MULT[pub[m.match] || 'standard']));
+            } else {
+                const base = smakecBase(p);
+                const special = tiers.filter(t => TIER_MULT[t] !== 1);
+                const coversAll = tiers.length === p.matches && new Set(tiers).size === 1;
+                if (special.length && (p.matches === 1 || coversAll)) {
+                    mult = TIER_MULT[special[0]];
+                    value = base * mult;
+                } else {
+                    value = base;
+                    if (special.length) { pending = true; mult = Math.max(...special.map(t => TIER_MULT[t])); }
+                }
+            }
+            return { value: Math.round((value - penalty) * 10) / 10, mult, penalty, pending };
+        }
+
         function smakecIndex(p) {
-            const value = smakecBase(p) * (p.multiplier || 1) - SMAKEC.penalty * (p.skipped || 0);
-            return Math.round(value * 10) / 10;
+            return smakecDetail(p).value;
         }
 
         function formatNumber(v) {
@@ -594,14 +648,16 @@
         }
 
         function smakecBadges(p) {
+            const d = smakecDetail(p);
             let out = '';
-            if ((p.multiplier || 1) !== 1) out += `<span class="ml-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-royal text-white">\u00d7${formatNumber(p.multiplier)}</span>`;
-            if (p.skipped) out += `<span class="ml-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-navy text-white">\u2212${SMAKEC.penalty * p.skipped}</span>`;
+            if (d.mult !== 1 && !d.pending) out += `<span class="ml-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-royal text-white">\u00d7${formatNumber(d.mult)}</span>`;
+            if (d.pending) out += `<span title="Násobič se použije, až budou známé statistiky hráče po jednotlivých zápasech" class="ml-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full border border-dashed border-royal text-royal">\u00d7${formatNumber(d.mult)}?</span>`;
+            if (d.penalty) out += `<span class="ml-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-navy text-white">\u2212${d.penalty}</span>`;
             return out;
         }
 
         const playersData = [
-            { name: 'Raďas', matches: 2, goals: 4, assists: 0, points: 4, plusMinus: 6 },
+            { name: 'Raďas', matches: 2, goals: 4, assists: 0, points: 4, plusMinus: 6, pub: { 2: 'active' } },
             { name: 'Vojta', matches: 2, goals: 0, assists: 4, points: 4, plusMinus: 5 },
             { name: 'Jurgi', matches: 2, goals: 1, assists: 2, points: 3, plusMinus: 6 },
             { name: 'Patrik', matches: 2, goals: 1, assists: 1, points: 2, plusMinus: 8 },
@@ -610,7 +666,7 @@
             { name: 'Tůmič', matches: 2, goals: 2, assists: 0, points: 2, plusMinus: 3 },
             { name: 'Kuba', matches: 1, goals: 1, assists: 1, points: 2, plusMinus: 2 },
             { name: 'Dan', matches: 2, goals: 1, assists: 0, points: 1, plusMinus: 5 },
-            { name: 'Lubos', matches: 1, goals: 1, assists: 0, points: 1, plusMinus: 2 }
+            { name: 'Luboš', matches: 1, goals: 1, assists: 0, points: 1, plusMinus: 2, pub: { 1: 'ultra' } }
         ];
 
         const matchesData = [
@@ -662,6 +718,8 @@
                     <td class="py-3.5 px-4 text-center font-black text-royal">${p.points}</td>
                     <td class="py-3.5 px-4 text-center font-bold text-navy">${formatPlusMinus(p.plusMinus)}</td>
                     <td class="py-3.5 px-4 text-center whitespace-nowrap"><span class="font-display font-black text-base text-navy">${formatNumber(smakecIndex(p))}</span>${smakecBadges(p)}</td>
+                    <td class="py-3.5 px-4 text-center font-bold text-royal">${pubCount(p, 'active') || '<span class="text-slate-300">&ndash;</span>'}</td>
+                    <td class="py-3.5 px-4 text-center font-bold text-navy">${pubCount(p, 'ultra') || '<span class="text-slate-300">&ndash;</span>'}</td>
                 `;
                 tableBody.appendChild(row);
 
@@ -697,6 +755,16 @@
                         <span class="text-[10px] uppercase tracking-wider font-bold text-white/70">Šmakec index</span>
                         <span class="font-display font-black text-lg">${formatNumber(smakecIndex(p))}${smakecBadges(p)}</span>
                     </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div class="bg-mist rounded-xl px-3 py-2 flex items-center justify-between">
+                            <span class="text-[9px] uppercase text-slate-500 font-semibold">Aktivní šmakec</span>
+                            <span class="text-sm font-black text-royal">${pubCount(p, 'active')}</span>
+                        </div>
+                        <div class="bg-mist rounded-xl px-3 py-2 flex items-center justify-between">
+                            <span class="text-[9px] uppercase text-slate-500 font-semibold">Ultrašmakec</span>
+                            <span class="text-sm font-black text-navy">${pubCount(p, 'ultra')}</span>
+                        </div>
+                    </div>
                 `;
                 mobileList.appendChild(card);
             });
@@ -721,6 +789,17 @@
             });
 
             renderPlayers(filtered);
+        }
+
+        function renderPubStats() {
+            [['active', 'pubActive'], ['ultra', 'pubUltra']].forEach(([tier, id]) => {
+                const who = playersData.filter(p => pubCount(p, tier) > 0).sort((a, b) => pubCount(b, tier) - pubCount(a, tier));
+                const total = who.reduce((sum, p) => sum + pubCount(p, tier), 0);
+                const totalEl = document.getElementById(id + 'Total');
+                const namesEl = document.getElementById(id + 'Names');
+                if (totalEl) totalEl.textContent = total;
+                if (namesEl) namesEl.textContent = who.length ? who.map(p => pubCount(p, tier) > 1 ? `${p.name} \u00d7${pubCount(p, tier)}` : p.name).join(', ') : 'Zatím nikdo.';
+            });
         }
 
         function renderSmakecLeader() {
@@ -873,6 +952,7 @@
             startCountdown();
             filterPlayers();
             renderSmakecLeader();
+            renderPubStats();
             renderMatches();
 
             const searchInput = document.getElementById('playerSearch');
