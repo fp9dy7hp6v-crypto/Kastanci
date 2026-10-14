@@ -1,228 +1,621 @@
 <!DOCTYPE html>
-<html lang="cs" class="h-full bg-slate-900 text-slate-100">
+<html lang="cs" class="h-full bg-white text-slate-900">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kaštánci - Statistiky</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800;900&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        brand: {
-                            50: '#eef2ff',
-                            500: '#6366f1',
-                            600: '#4f46e5',
-                            700: '#4338ca',
-                            900: '#312e81',
-                        }
+                        navy: '#04163f',
+                        royal: '#0b4cd1',
+                        bright: '#1d6bff',
+                        mist: '#eef3ff'
+                    },
+                    fontFamily: {
+                        display: ['Montserrat', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'Arial', 'sans-serif']
                     }
                 }
             }
         }
     </script>
     <style>
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
+        .font-display, .nav-link, .pill, h1, h2 { font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }
         .tab-content { display: none; }
         .tab-content.active { display: block !important; }
+
+        /* Hlavní navigace */
+        .nav-link { color: rgba(255,255,255,.72); border-bottom: 3px solid transparent; }
+        .nav-link:hover { color: #fff; }
+        .nav-link.is-active { color: #fff; border-bottom-color: #fff; }
+
+        /* Spodní navigace na mobilu */
+        .mobile-nav-btn { color: #64748b; }
+        .mobile-nav-btn.is-active { color: #0b4cd1; }
+
+        /* Pilulková tlačítka v hero */
+        .pill { border: 1.5px solid rgba(255,255,255,.85); color: #fff; }
+        .pill:hover { background: rgba(255,255,255,.14); }
+        .pill.is-active { background: #fff; color: #0b4cd1; border-color: #fff; }
+
+        /* Hero: modrá vlevo, světlá vpravo (od md výš) */
+        .hero-split { background: linear-gradient(90deg, #0b4cd1 0 56%, #eef3ff 56% 100%); }
+        .hero-blue { background: radial-gradient(120% 90% at 10% 0%, #1d6bff 0%, #0b4cd1 45%, #083a9f 100%); }
+        .hero-light {
+            background-color: #eef3ff;
+            background-image: radial-gradient(rgba(11,76,209,.10) 1px, transparent 1.4px);
+            background-size: 7px 7px;
+        }
+        .section-title { position: relative; padding-left: 14px; }
+        .section-title::before { content: ""; position: absolute; left: 0; top: 2px; bottom: 2px; width: 5px; border-radius: 3px; background: #0b4cd1; }
     </style>
 </head>
-<body class="min-h-full flex flex-col justify-between pb-24 md:pb-0 selection:bg-brand-500 selection:text-white">
+<body class="min-h-full flex flex-col pb-20 md:pb-0 selection:bg-royal selection:text-white">
 
-    <!-- Header -->
-    <header class="sticky top-0 z-30 bg-slate-900 border-b border-slate-800">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-600 to-amber-400 flex items-center justify-center font-bold text-xl text-white shadow-lg">
-                    K
-                </div>
-                <div>
-                    <h1 class="font-bold text-lg leading-tight">Kaštánci</h1>
-                    <p class="text-xs text-slate-400">Sezóna 2025/2026</p>
-                </div>
+    <!-- Horní tenká lišta -->
+    <div class="bg-black text-white text-[11px] font-semibold uppercase tracking-wider">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-10 flex items-center justify-between">
+            <span class="font-display">Sezóna 2025/2026</span>
+            <span class="font-display text-white/70"><i class="fa-solid fa-circle text-[6px] text-bright align-middle mr-2"></i>2 zápasy &middot; 2 výhry</span>
+        </div>
+    </div>
+
+    <!-- Promo pruh -->
+    <button type="button" data-tab="matches" class="block w-full bg-bright hover:bg-royal transition-colors text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-12 flex items-center justify-center gap-3 font-display font-extrabold uppercase text-xs sm:text-sm tracking-wide">
+            <i class="fa-solid fa-trophy"></i>
+            <span>Vítězný start: 2 výhry, skóre 13:0</span>
+            <span class="w-6 h-6 rounded-full border-2 border-white flex items-center justify-center text-[10px]"><i class="fa-solid fa-chevron-right"></i></span>
+        </div>
+    </button>
+
+    <!-- Hlavní navigace -->
+    <header class="sticky top-0 z-40 bg-navy/95 backdrop-blur border-b border-white/10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 md:h-[72px] flex items-center justify-between">
+            <div class="flex items-center gap-8 h-full">
+                <button type="button" data-tab="overview" class="flex items-center gap-3 shrink-0">
+                    <span class="w-10 h-10 rounded-full bg-white flex items-center justify-center font-display font-black text-xl text-royal shadow-lg ring-2 ring-bright">K</span>
+                    <span class="font-display font-extrabold text-white text-lg leading-none uppercase tracking-wide">Kaštánci</span>
+                </button>
+                <nav class="hidden md:flex items-stretch gap-7 h-full">
+                    <button type="button" data-tab="overview" data-nav class="nav-link is-active font-extrabold uppercase text-[15px] tracking-wide pt-1">Přehled</button>
+                    <button type="button" data-tab="players" data-nav class="nav-link font-extrabold uppercase text-[15px] tracking-wide pt-1">Hráči</button>
+                    <button type="button" data-tab="matches" data-nav class="nav-link font-extrabold uppercase text-[15px] tracking-wide pt-1">Zápasy</button>
+                </nav>
             </div>
-            <span class="bg-slate-800 text-xs font-medium border border-slate-700 text-slate-200 rounded-lg px-3 py-1.5">
-                2 Zápasy
-            </span>
+            <div class="hidden md:flex items-center gap-3">
+                <button type="button" data-tab="players" class="bg-bright hover:bg-royal transition-colors text-white rounded-full px-5 py-2.5 text-sm font-semibold flex items-center gap-2">
+                    <i class="fa-solid fa-ranking-star"></i> Statistiky hráčů <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                </button>
+                <button type="button" data-tab="matches" class="border border-white/70 hover:bg-white/10 transition-colors text-white rounded-full px-5 py-2.5 text-sm font-semibold flex items-center gap-2">
+                    <i class="fa-solid fa-calendar-days"></i> Zápasy <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                </button>
+            </div>
         </div>
     </header>
 
-    <!-- Main Content -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow w-full">
+    <main class="flex-grow w-full">
 
-        <!-- Tab Nav (Desktop) -->
-        <div class="flex space-x-2 border-b border-slate-800 mb-6 overflow-x-auto no-scrollbar">
-            <button type="button" data-tab="overview" class="tab-btn px-4 py-2.5 font-medium text-sm border-b-2 border-brand-500 text-brand-500 flex items-center space-x-2 whitespace-nowrap">
-                <i class="fa-solid fa-chart-pie"></i>
-                <span>Přehled</span>
-            </button>
-            <button type="button" data-tab="players" class="tab-btn px-4 py-2.5 font-medium text-sm border-b-2 border-transparent text-slate-400 flex items-center space-x-2 whitespace-nowrap">
-                <i class="fa-solid fa-users"></i>
-                <span>Statistiky hráčů</span>
-            </button>
-            <button type="button" data-tab="matches" class="tab-btn px-4 py-2.5 font-medium text-sm border-b-2 border-transparent text-slate-400 flex items-center space-x-2 whitespace-nowrap">
-                <i class="fa-solid fa-calendar-days"></i>
-                <span>Zápasy & Výsledky</span>
-            </button>
+        <!-- TAB 1: PŘEHLED -->
+        <div id="content-overview" class="tab-content active">
+
+            <!-- HERO -->
+            <section class="relative overflow-hidden">
+                <div class="hidden md:block absolute inset-0 hero-split" aria-hidden="true"></div>
+
+                <div class="relative md:min-h-[600px] flex flex-col md:block">
+                    <!-- Text -->
+                    <div class="hero-blue md:bg-none relative z-10 px-4 sm:px-6 lg:px-8 pt-10 pb-8 md:py-0 md:absolute md:inset-y-0 md:left-0 md:w-[62%] flex flex-col justify-end">
+                        <!-- dekorace: rámeček s velkým K -->
+                        <div class="hidden md:block absolute left-8 top-10 w-[300px] h-[200px] opacity-40 pointer-events-none" aria-hidden="true">
+                            <span class="absolute left-0 top-0 w-12 h-12 border-t-2 border-l-2 border-white"></span>
+                            <span class="absolute right-0 top-0 w-12 h-12 border-t-2 border-r-2 border-white"></span>
+                            <span class="absolute left-0 bottom-0 w-12 h-12 border-b-2 border-l-2 border-white"></span>
+                            <span class="absolute right-0 bottom-0 w-12 h-12 border-b-2 border-r-2 border-white"></span>
+                            <span class="absolute inset-0 flex items-center justify-center font-display font-black text-[130px] leading-none text-white/80">K</span>
+                        </div>
+
+                        <div class="relative max-w-3xl md:pb-24 md:pl-0">
+                            <p class="text-white font-display font-semibold uppercase text-sm md:text-base tracking-wide flex items-center gap-3">
+                                <span id="heroEyebrow">Výsledek zápasu</span>
+                            </p>
+                            <h1 id="heroTitle" class="mt-4 text-white font-display font-extrabold uppercase text-4xl sm:text-5xl lg:text-[64px] leading-[1.05] tracking-tight">
+                                Kaštánci porazili Real Dejvice 8:0
+                            </h1>
+                            <div class="mt-7 flex flex-wrap items-center gap-3">
+                                <button type="button" data-tab="matches" class="pill rounded-full px-5 py-2.5 text-sm font-semibold inline-flex items-center gap-2">
+                                    Celý přehled <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- pilulky (zkratky na záložky) -->
+                        <div class="relative md:absolute md:left-8 md:bottom-6 mt-2 md:mt-0 flex flex-wrap gap-2">
+                            <button type="button" data-tab="overview" class="pill is-active rounded-full px-5 py-2 text-sm font-semibold">Přehled</button>
+                            <button type="button" data-tab="players" class="pill rounded-full px-5 py-2 text-sm font-semibold">Hráči</button>
+                            <button type="button" data-tab="matches" class="pill rounded-full px-5 py-2 text-sm font-semibold">Zápasy</button>
+                        </div>
+                    </div>
+
+                    <!-- Hráči v dresech -->
+                    <div class="hero-light md:bg-none relative md:absolute md:inset-y-0 md:right-0 md:w-[50%] h-[300px] sm:h-[360px] md:h-auto">
+                        <svg viewBox="0 0 640 560" preserveAspectRatio="xMidYMax meet" class="absolute inset-0 w-full h-full" role="img" aria-label="Dva hráči: jeden v modrém a druhý v bílém dresu">
+                            <defs>
+                                <linearGradient id="jerseyBlue" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0" stop-color="#1d63e8"/>
+                                    <stop offset="1" stop-color="#0a3fb0"/>
+                                </linearGradient>
+                                <linearGradient id="jerseyWhite" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0" stop-color="#ffffff"/>
+                                    <stop offset="1" stop-color="#d9e3f7"/>
+                                </linearGradient>
+                                <linearGradient id="skinDark" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0" stop-color="#8a5a3c"/>
+                                    <stop offset="1" stop-color="#6b4229"/>
+                                </linearGradient>
+                                <linearGradient id="skinLight" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0" stop-color="#f3cba8"/>
+                                    <stop offset="1" stop-color="#e2ad86"/>
+                                </linearGradient>
+                                <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+                                    <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#04163f" flood-opacity=".28"/>
+                                </filter>
+                            </defs>
+
+                            <!-- Hráč 1: modrý dres -->
+                            <g filter="url(#softShadow)">
+                                <!-- dres -->
+                                <path d="M30 560 L42 420 Q50 352 135 330 L186 316 L254 316 L305 330 Q390 352 398 420 L410 560 Z" fill="url(#jerseyBlue)"/>
+                                <!-- lem rukávů -->
+                                <path d="M60 420 Q70 362 138 340" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" opacity=".9"/>
+                                <path d="M380 420 Q370 362 302 340" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" opacity=".9"/>
+                                <!-- krk -->
+                                <path d="M188 262 L252 262 L254 322 Q220 372 186 322 Z" fill="url(#skinDark)"/>
+                                <!-- límec -->
+                                <path d="M178 312 Q220 392 262 312" fill="none" stroke="#fff" stroke-width="12" stroke-linecap="round"/>
+                                <!-- číslo a znak -->
+                                <text x="220" y="500" text-anchor="middle" font-family="Montserrat, Arial, sans-serif" font-weight="900" font-size="86" fill="#fff">10</text>
+                                <circle cx="330" cy="408" r="17" fill="#fff"/>
+                                <text x="330" y="415" text-anchor="middle" font-family="Montserrat, Arial, sans-serif" font-weight="900" font-size="20" fill="#0b4cd1">K</text>
+                                <!-- uši -->
+                                <ellipse cx="156" cy="196" rx="10" ry="16" fill="#6b4229"/>
+                                <ellipse cx="284" cy="196" rx="10" ry="16" fill="#6b4229"/>
+                                <!-- hlava -->
+                                <ellipse cx="220" cy="190" rx="62" ry="78" fill="url(#skinDark)"/>
+                                <!-- vlasy: copánky -->
+                                <path d="M158 172 Q150 100 220 96 Q290 100 282 172 Q272 132 220 130 Q168 132 158 172 Z" fill="#17120f"/>
+                                <g fill="#17120f">
+                                    <circle cx="170" cy="104" r="15"/><circle cx="198" cy="84" r="16"/><circle cx="228" cy="80" r="16"/>
+                                    <circle cx="256" cy="88" r="15"/><circle cx="278" cy="108" r="14"/><circle cx="154" cy="128" r="13"/>
+                                    <circle cx="288" cy="132" r="12"/><circle cx="214" cy="106" r="14"/>
+                                </g>
+                                <!-- obličej -->
+                                <path d="M184 168 L206 172 M256 168 L234 172" stroke="#17120f" stroke-width="5" stroke-linecap="round"/>
+                                <circle cx="196" cy="188" r="5.5" fill="#17120f"/>
+                                <circle cx="244" cy="188" r="5.5" fill="#17120f"/>
+                                <path d="M220 192 Q214 214 224 218" fill="none" stroke="#4a2c18" stroke-width="3.5" stroke-linecap="round"/>
+                                <path d="M190 232 Q220 262 250 232 Q220 240 190 232 Z" fill="#fff" stroke="#4a2c18" stroke-width="2.5" stroke-linejoin="round"/>
+                            </g>
+
+                            <!-- Hráč 2: bílý dres -->
+                            <g filter="url(#softShadow)">
+                                <path d="M262 560 L274 450 Q282 392 362 372 L408 360 L472 360 L518 372 Q598 392 606 450 L618 560 Z" fill="url(#jerseyWhite)" stroke="#b9c8e8" stroke-width="2"/>
+                                <!-- modré pruhy na ramenou -->
+                                <path d="M292 450 Q302 400 372 382" fill="none" stroke="#0b4cd1" stroke-width="8" stroke-linecap="round"/>
+                                <path d="M588 450 Q578 400 508 382" fill="none" stroke="#0b4cd1" stroke-width="8" stroke-linecap="round"/>
+                                <!-- krk -->
+                                <path d="M408 306 L472 306 L474 366 Q440 414 406 366 Z" fill="url(#skinLight)"/>
+                                <!-- límec -->
+                                <path d="M398 358 Q440 432 482 358" fill="none" stroke="#0b4cd1" stroke-width="12" stroke-linecap="round"/>
+                                <!-- číslo a znak -->
+                                <text x="440" y="522" text-anchor="middle" font-family="Montserrat, Arial, sans-serif" font-weight="900" font-size="80" fill="#0b4cd1">7</text>
+                                <circle cx="352" cy="452" r="17" fill="#0b4cd1"/>
+                                <text x="352" y="459" text-anchor="middle" font-family="Montserrat, Arial, sans-serif" font-weight="900" font-size="20" fill="#fff">K</text>
+                                <!-- uši -->
+                                <ellipse cx="384" cy="244" rx="9" ry="15" fill="#e2ad86"/>
+                                <ellipse cx="496" cy="244" rx="9" ry="15" fill="#e2ad86"/>
+                                <!-- hlava -->
+                                <ellipse cx="440" cy="236" rx="58" ry="72" fill="url(#skinLight)"/>
+                                <!-- vousy -->
+                                <path d="M384 254 Q388 316 440 318 Q492 316 496 254 Q482 292 440 294 Q398 292 384 254 Z" fill="#a9794a" opacity=".85"/>
+                                <!-- vlasy -->
+                                <path d="M382 228 Q372 152 440 148 Q508 152 498 228 Q492 188 462 182 Q430 192 410 186 Q388 194 382 228 Z" fill="#b98a52"/>
+                                <path d="M404 172 Q440 140 486 170" fill="none" stroke="#a37540" stroke-width="5" stroke-linecap="round"/>
+                                <!-- obličej -->
+                                <path d="M404 214 L426 218 M476 214 L454 218" stroke="#8a5f33" stroke-width="5" stroke-linecap="round"/>
+                                <circle cx="418" cy="234" r="5.5" fill="#3f5f86"/>
+                                <circle cx="462" cy="234" r="5.5" fill="#3f5f86"/>
+                                <path d="M440 238 Q434 258 444 262" fill="none" stroke="#b88660" stroke-width="3.5" stroke-linecap="round"/>
+                                <path d="M418 284 Q440 294 462 284" fill="none" stroke="#7a4b2a" stroke-width="3.5" stroke-linecap="round"/>
+                            </g>
+                        </svg>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Statistiky -->
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
+                <div>
+                    <h2 class="section-title font-display font-extrabold uppercase text-xl text-navy mb-5">Sezóna v číslech</h2>
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                        <div class="bg-mist border border-royal/10 p-4 sm:p-5 rounded-2xl">
+                            <span class="text-xs text-slate-500 font-semibold uppercase tracking-wide">Odehrané zápasy</span>
+                            <div class="flex items-baseline justify-between mt-3">
+                                <span class="font-display text-3xl sm:text-4xl font-black text-navy">2</span>
+                                <span class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-royal text-white">100% výhry</span>
+                            </div>
+                        </div>
+                        <div class="bg-mist border border-royal/10 p-4 sm:p-5 rounded-2xl">
+                            <span class="text-xs text-slate-500 font-semibold uppercase tracking-wide">Získané body</span>
+                            <div class="flex items-baseline justify-between mt-3">
+                                <span class="font-display text-3xl sm:text-4xl font-black text-navy">6</span>
+                                <span class="text-xs text-slate-500">z 6 možných</span>
+                            </div>
+                        </div>
+                        <div class="bg-mist border border-royal/10 p-4 sm:p-5 rounded-2xl">
+                            <span class="text-xs text-slate-500 font-semibold uppercase tracking-wide">Skóre klub</span>
+                            <div class="flex items-baseline justify-between mt-3">
+                                <span class="font-display text-3xl sm:text-4xl font-black text-navy">13:0</span>
+                                <span class="text-xs font-bold text-royal">+13</span>
+                            </div>
+                        </div>
+                        <div class="bg-mist border border-royal/10 p-4 sm:p-5 rounded-2xl">
+                            <span class="text-xs text-slate-500 font-semibold uppercase tracking-wide">Průměr gólů/zápas</span>
+                            <div class="flex items-baseline justify-between mt-3">
+                                <span class="font-display text-3xl sm:text-4xl font-black text-navy">6.5</span>
+                                <span class="text-xs text-slate-500">G/Z</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="bg-white border border-slate-200 shadow-sm p-5 sm:p-6 rounded-3xl flex flex-col justify-between">
+                        <div>
+                            <h2 class="section-title font-display font-extrabold uppercase text-base text-navy">Bilance zápasů</h2>
+                            <p class="text-xs text-slate-500 mt-2 mb-4 pl-[14px]">Celkový přehled výsledků</p>
+                        </div>
+                        <div class="relative w-full h-48 flex justify-center items-center">
+                            <canvas id="resultsChart"></canvas>
+                        </div>
+                        <div class="flex justify-around text-center pt-4 border-t border-slate-200 mt-2">
+                            <div>
+                                <span class="block text-xs text-slate-500">Výhry</span>
+                                <span class="font-display text-lg font-extrabold text-royal">2</span>
+                            </div>
+                            <div>
+                                <span class="block text-xs text-slate-500">Remízy</span>
+                                <span class="font-display text-lg font-extrabold text-slate-400">0</span>
+                            </div>
+                            <div>
+                                <span class="block text-xs text-slate-500">Prohry</span>
+                                <span class="font-display text-lg font-extrabold text-navy">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-2 bg-white border border-slate-200 shadow-sm p-5 sm:p-6 rounded-3xl">
+                        <div class="flex items-center justify-between mb-5">
+                            <h2 class="section-title font-display font-extrabold uppercase text-base text-navy">Lídři týmu</h2>
+                            <button type="button" data-tab="players" class="text-xs font-bold text-royal hover:text-navy uppercase tracking-wide">Všichni hráči <i class="fa-solid fa-chevron-right text-[9px]"></i></button>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <div class="p-4 rounded-2xl bg-mist border border-royal/10 flex items-center space-x-3">
+                                <div class="w-12 h-12 rounded-full bg-royal text-white flex items-center justify-center text-lg shrink-0">
+                                    <i class="fa-solid fa-futbol"></i>
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-royal block">Nejlepší střelec</span>
+                                    <p class="text-sm font-extrabold text-navy truncate">Raďas</p>
+                                    <p class="text-xs text-slate-500">4 góly (2 zápasy)</p>
+                                </div>
+                            </div>
+
+                            <div class="p-4 rounded-2xl bg-mist border border-royal/10 flex items-center space-x-3">
+                                <div class="w-12 h-12 rounded-full bg-navy text-white flex items-center justify-center text-lg shrink-0">
+                                    <i class="fa-solid fa-handshake"></i>
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-royal block">Nejlepší nahrávač</span>
+                                    <p class="text-sm font-extrabold text-navy truncate">Vojta</p>
+                                    <p class="text-xs text-slate-500">4 asistence</p>
+                                </div>
+                            </div>
+
+                            <div class="p-4 rounded-2xl bg-mist border border-royal/10 flex items-center space-x-3">
+                                <div class="w-12 h-12 rounded-full bg-bright text-white flex items-center justify-center text-lg shrink-0">
+                                    <i class="fa-solid fa-plus-minus"></i>
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-royal block">Nejlepší +/-</span>
+                                    <p class="text-sm font-extrabold text-navy truncate">Patrik</p>
+                                    <p class="text-xs text-slate-500">+8 bodů</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <!-- TAB 1: OVERVIEW -->
-        <div id="content-overview" class="tab-content active space-y-6">
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-                <div class="bg-slate-800/80 border border-slate-700/60 p-4 rounded-xl">
-                    <span class="text-xs text-slate-400 font-medium">Odehrané zápasy</span>
-                    <div class="flex items-baseline justify-between mt-2">
-                        <span class="text-2xl sm:text-3xl font-extrabold text-white">2</span>
-                        <span class="text-xs font-semibold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">100% výhry</span>
-                    </div>
-                </div>
-
-                <div class="bg-slate-800/80 border border-slate-700/60 p-4 rounded-xl">
-                    <span class="text-xs text-slate-400 font-medium">Získané body</span>
-                    <div class="flex items-baseline justify-between mt-2">
-                        <span class="text-2xl sm:text-3xl font-extrabold text-white">6</span>
-                        <span class="text-xs text-slate-400">z 6 možných</span>
-                    </div>
-                </div>
-
-                <div class="bg-slate-800/80 border border-slate-700/60 p-4 rounded-xl">
-                    <span class="text-xs text-slate-400 font-medium">Skóre klub</span>
-                    <div class="flex items-baseline justify-between mt-2">
-                        <span class="text-2xl sm:text-3xl font-extrabold text-white">13:0</span>
-                        <span class="text-xs font-semibold text-emerald-400">+13</span>
-                    </div>
-                </div>
-
-                <div class="bg-slate-800/80 border border-slate-700/60 p-4 rounded-xl">
-                    <span class="text-xs text-slate-400 font-medium">Průměr gólů/zápas</span>
-                    <div class="flex items-baseline justify-between mt-2">
-                        <span class="text-2xl sm:text-3xl font-extrabold text-white">6.5</span>
-                        <span class="text-xs text-slate-400">G/Z</span>
-                    </div>
+        <!-- TAB 2: HRÁČI -->
+        <div id="content-players" class="tab-content">
+            <div class="hero-blue">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-14">
+                    <p class="text-white/80 font-display font-semibold uppercase text-sm tracking-wide">Sezóna 2025/2026</p>
+                    <h1 class="mt-2 text-white font-display font-extrabold uppercase text-4xl md:text-5xl tracking-tight">Statistiky hráčů</h1>
                 </div>
             </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div class="bg-slate-800/80 border border-slate-700/60 p-5 rounded-2xl flex flex-col justify-between">
-                    <div>
-                        <h2 class="text-base font-bold text-white mb-1">Bilance zápasů</h2>
-                        <p class="text-xs text-slate-400 mb-4">Celkový přehled výsledků</p>
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-4">
+                <div class="flex flex-col md:flex-row gap-3 justify-between bg-mist p-3 sm:p-4 rounded-2xl border border-royal/10">
+                    <div class="relative flex-grow">
+                        <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                        <input type="text" id="playerSearch" placeholder="Hledat hráče..." class="w-full bg-white border border-slate-200 rounded-full pl-10 pr-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-bright">
                     </div>
-                    <div class="relative w-full h-48 flex justify-center items-center">
-                        <canvas id="resultsChart"></canvas>
-                    </div>
-                    <div class="flex justify-around text-center pt-4 border-t border-slate-700/50 mt-2">
-                        <div>
-                            <span class="block text-xs text-slate-400">Výhry</span>
-                            <span class="text-lg font-bold text-emerald-400">2</span>
-                        </div>
-                        <div>
-                            <span class="block text-xs text-slate-400">Remízy</span>
-                            <span class="text-lg font-bold text-amber-400">0</span>
-                        </div>
-                        <div>
-                            <span class="block text-xs text-slate-400">Prohry</span>
-                            <span class="text-lg font-bold text-rose-400">0</span>
-                        </div>
-                    </div>
+                    <select id="sortBy" class="bg-white border border-slate-200 text-xs sm:text-sm text-slate-800 rounded-full px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-bright">
+                        <option value="points">Řadit: Kanadské body (G+A)</option>
+                        <option value="goals">Řadit: Góly</option>
+                        <option value="assists">Řadit: Asistence</option>
+                        <option value="plusMinus">Řadit: +/- body</option>
+                        <option value="matches">Řadit: Zápasy</option>
+                    </select>
                 </div>
 
-                <div class="lg:col-span-2 bg-slate-800/80 border border-slate-700/60 p-5 rounded-2xl">
-                    <div class="flex items-center justify-between mb-4">
-                        <h2 class="text-base font-bold text-white">Lídři týmu</h2>
-                        <button type="button" data-tab="players" class="tab-btn text-xs font-semibold text-brand-500">Všichni hráči &rarr;</button>
-                    </div>
+                <!-- Mobilní karty -->
+                <div id="playersMobileList" class="grid grid-cols-1 sm:grid-cols-2 gap-3 md:hidden"></div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                        <div class="p-4 rounded-xl bg-slate-900/60 border border-slate-700/40 flex items-center space-x-3">
-                            <div class="w-12 h-12 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 font-bold text-lg shrink-0">
-                                <i class="fa-solid fa-futbol"></i>
-                            </div>
-                            <div class="min-w-0 flex-1">
-                                <span class="text-[10px] font-bold uppercase tracking-wider text-amber-400 block">Nejlepší střelec</span>
-                                <p class="text-sm font-bold text-white truncate">Raďas</p>
-                                <p class="text-xs text-slate-400">4 góly (2 zápasy)</p>
-                            </div>
-                        </div>
-
-                        <div class="p-4 rounded-xl bg-slate-900/60 border border-slate-700/40 flex items-center space-x-3">
-                            <div class="w-12 h-12 rounded-full bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400 font-bold text-lg shrink-0">
-                                <i class="fa-solid fa-handshake"></i>
-                            </div>
-                            <div class="min-w-0 flex-1">
-                                <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-400 block">Nejlepší nahrávač</span>
-                                <p class="text-sm font-bold text-white truncate">Vojta</p>
-                                <p class="text-xs text-slate-400">4 asistence</p>
-                            </div>
-                        </div>
-
-                        <div class="p-4 rounded-xl bg-slate-900/60 border border-slate-700/40 flex items-center space-x-3">
-                            <div class="w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold text-lg shrink-0">
-                                <i class="fa-solid fa-plus-minus"></i>
-                            </div>
-                            <div class="min-w-0 flex-1">
-                                <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400 block">Nejlepší +/-</span>
-                                <p class="text-sm font-bold text-white truncate">Patrik</p>
-                                <p class="text-xs text-slate-400">+8 bodů</p>
-                            </div>
-                        </div>
-                    </div>
+                <!-- Tabulka -->
+                <div class="hidden md:block bg-white border border-slate-200 shadow-sm rounded-2xl overflow-hidden">
+                    <table class="w-full text-left text-sm text-slate-700">
+                        <thead class="bg-navy text-xs uppercase text-white/80 font-display tracking-wide">
+                            <tr>
+                                <th class="py-4 px-4">#</th>
+                                <th class="py-4 px-4">Hráč</th>
+                                <th class="py-4 px-4 text-center">Zápasy</th>
+                                <th class="py-4 px-4 text-center">Góly</th>
+                                <th class="py-4 px-4 text-center">Asistence</th>
+                                <th class="py-4 px-4 text-center">Body (G+A)</th>
+                                <th class="py-4 px-4 text-center">+/-</th>
+                            </tr>
+                        </thead>
+                        <tbody id="playersTableBody" class="divide-y divide-slate-100"></tbody>
+                    </table>
                 </div>
             </div>
         </div>
 
-        <!-- TAB 2: PLAYERS -->
-        <div id="content-players" class="tab-content space-y-4">
-            <div class="flex flex-col md:flex-row gap-3 justify-between bg-slate-800/80 p-3 sm:p-4 rounded-xl border border-slate-700/60">
-                <div class="relative flex-grow">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                    <input type="text" id="playerSearch" placeholder="Hledat hráče..." class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-10 pr-4 py-2 text-sm text-slate-200">
+        <!-- TAB 3: ZÁPASY -->
+        <div id="content-matches" class="tab-content">
+            <div class="hero-blue">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-14">
+                    <p class="text-white/80 font-display font-semibold uppercase text-sm tracking-wide">Sezóna 2025/2026</p>
+                    <h1 class="mt-2 text-white font-display font-extrabold uppercase text-4xl md:text-5xl tracking-tight">Zápasy &amp; výsledky</h1>
                 </div>
-                <select id="sortBy" class="bg-slate-900 border border-slate-700 text-xs sm:text-sm text-slate-200 rounded-lg px-3 py-2">
-                    <option value="points">Řadit: Kanadské body (G+A)</option>
-                    <option value="goals">Řadit: Góly</option>
-                    <option value="assists">Řadit: Asistence</option>
-                    <option value="plusMinus">Řadit: +/- body</option>
-                    <option value="matches">Řadit: Zápasy</option>
-                </select>
             </div>
-
-            <!-- Mobile Cards -->
-            <div id="playersMobileList" class="grid grid-cols-1 sm:grid-cols-2 gap-3 md:hidden"></div>
-
-            <!-- Desktop Table -->
-            <div class="hidden md:block bg-slate-800/80 border border-slate-700/60 rounded-xl overflow-hidden">
-                <table class="w-full text-left text-sm text-slate-300">
-                    <thead class="bg-slate-900/80 text-xs uppercase text-slate-400 border-b border-slate-700/80">
-                        <tr>
-                            <th class="py-3.5 px-4">#</th>
-                            <th class="py-3.5 px-4">Hráč</th>
-                            <th class="py-3.5 px-4 text-center">Zápasy</th>
-                            <th class="py-3.5 px-4 text-center text-amber-400 font-bold">Góly</th>
-                            <th class="py-3.5 px-4 text-center text-indigo-400 font-bold">Asistence</th>
-                            <th class="py-3.5 px-4 text-center text-brand-400 font-bold">Body (G+A)</th>
-                            <th class="py-3.5 px-4 text-center text-emerald-400 font-bold">+/-</th>
-                        </tr>
-                    </thead>
-                    <tbody id="playersTableBody" class="divide-y divide-slate-700/50"></tbody>
-                </table>
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-4">
+                <h2 class="section-title font-display font-extrabold uppercase text-base text-navy">Přehled odehraných zápasů</h2>
+                <div id="matchesContainer" class="space-y-3"></div>
             </div>
-        </div>
-
-        <!-- TAB 3: MATCHES -->
-        <div id="content-matches" class="tab-content space-y-4">
-            <div class="bg-slate-800/80 p-4 rounded-xl border border-slate-700/60">
-                <h2 class="text-sm font-bold text-slate-200">Přehled odehraných zápasů</h2>
-            </div>
-            <div id="matchesContainer" class="space-y-3"></div>
         </div>
 
     </main>
 
-    <!-- Mobile Nav Bar -->
-    <nav class="md:hidden fixed bottom-0 left-0 right
+    <footer class="bg-navy text-white/70 text-xs mt-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex items-center justify-between">
+            <span class="font-display font-extrabold uppercase tracking-wide text-white">Kaštánci</span>
+            <span>Sezóna 2025/2026</span>
+        </div>
+    </footer>
+
+    <!-- Mobilní spodní navigace -->
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-50 px-6 py-2.5">
+        <div class="flex justify-around items-center">
+            <button type="button" data-tab="overview" data-nav class="mobile-nav-btn is-active flex flex-col items-center">
+                <i class="fa-solid fa-chart-pie text-xl mb-1"></i>
+                <span class="text-[11px] font-bold uppercase">Přehled</span>
+            </button>
+            <button type="button" data-tab="players" data-nav class="mobile-nav-btn flex flex-col items-center">
+                <i class="fa-solid fa-users text-xl mb-1"></i>
+                <span class="text-[11px] font-bold uppercase">Hráči</span>
+            </button>
+            <button type="button" data-tab="matches" data-nav class="mobile-nav-btn flex flex-col items-center">
+                <i class="fa-solid fa-calendar-days text-xl mb-1"></i>
+                <span class="text-[11px] font-bold uppercase">Zápasy</span>
+            </button>
+        </div>
+    </nav>
+
+    <script>
+        const playersData = [
+            { name: 'Raďas', matches: 2, goals: 4, assists: 0, points: 4, plusMinus: 6 },
+            { name: 'Vojta', matches: 2, goals: 0, assists: 4, points: 4, plusMinus: 5 },
+            { name: 'Jurgi', matches: 2, goals: 1, assists: 2, points: 3, plusMinus: 6 },
+            { name: 'Patrik', matches: 2, goals: 1, assists: 1, points: 2, plusMinus: 8 },
+            { name: 'Dave', matches: 2, goals: 1, assists: 1, points: 2, plusMinus: 7 },
+            { name: 'Řízek', matches: 2, goals: 1, assists: 1, points: 2, plusMinus: 5 },
+            { name: 'Tůmič', matches: 2, goals: 2, assists: 0, points: 2, plusMinus: 3 },
+            { name: 'Kuba', matches: 1, goals: 1, assists: 1, points: 2, plusMinus: 2 },
+            { name: 'Dan', matches: 2, goals: 1, assists: 0, points: 1, plusMinus: 5 },
+            { name: 'Lubos', matches: 1, goals: 1, assists: 0, points: 1, plusMinus: 2 }
+        ];
+
+        const matchesData = [
+            { date: "Zápas 1", home: "Kaštánci", away: "Kapitáni", scoreHome: 5, scoreAway: 0, note: "Poločas 3:0" },
+            { date: "Zápas 2", home: "Kaštánci", away: "Real Dejvice", scoreHome: 8, scoreAway: 0, note: "Poločas 1:0" }
+        ];
+
+        function activateTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            const target = document.getElementById('content-' + tabName);
+            if (target) target.classList.add('active');
+
+            document.querySelectorAll('[data-nav], .pill[data-tab]').forEach(btn => {
+                btn.classList.toggle('is-active', btn.getAttribute('data-tab') === tabName);
+            });
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        document.addEventListener('click', function(e) {
+            const btn = e.target.closest('[data-tab]');
+            if (btn) {
+                e.preventDefault();
+                activateTab(btn.getAttribute('data-tab'));
+            }
+        });
+
+        function formatPlusMinus(v) {
+            return v > 0 ? '+' + v : String(v);
+        }
+
+        function renderPlayers(players) {
+            const tableBody = document.getElementById('playersTableBody');
+            const mobileList = document.getElementById('playersMobileList');
+            if (!tableBody || !mobileList) return;
+
+            tableBody.innerHTML = '';
+            mobileList.innerHTML = '';
+
+            players.forEach((p, idx) => {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-mist transition-colors';
+                row.innerHTML = `
+                    <td class="py-3.5 px-4 font-bold text-slate-400">${idx + 1}.</td>
+                    <td class="py-3.5 px-4 font-extrabold text-navy">${p.name}</td>
+                    <td class="py-3.5 px-4 text-center">${p.matches}</td>
+                    <td class="py-3.5 px-4 text-center font-bold text-royal">${p.goals}</td>
+                    <td class="py-3.5 px-4 text-center font-bold text-navy">${p.assists}</td>
+                    <td class="py-3.5 px-4 text-center font-black text-royal">${p.points}</td>
+                    <td class="py-3.5 px-4 text-center font-bold text-navy">${formatPlusMinus(p.plusMinus)}</td>
+                `;
+                tableBody.appendChild(row);
+
+                const card = document.createElement('div');
+                card.className = "bg-white border border-slate-200 shadow-sm p-4 rounded-2xl flex flex-col justify-between space-y-3";
+                card.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center space-x-2.5">
+                            <span class="w-7 h-7 rounded-full bg-royal text-white font-bold text-xs flex items-center justify-center">${idx + 1}</span>
+                            <h3 class="font-extrabold text-navy text-base">${p.name}</h3>
+                        </div>
+                        <span class="text-xs text-slate-500">${p.matches} zápasy</span>
+                    </div>
+                    <div class="grid grid-cols-4 gap-2 pt-3 border-t border-slate-100">
+                        <div class="bg-mist p-2 rounded-xl text-center">
+                            <span class="text-[9px] uppercase text-slate-500 block font-semibold">Góly</span>
+                            <span class="text-sm font-black text-royal">${p.goals}</span>
+                        </div>
+                        <div class="bg-mist p-2 rounded-xl text-center">
+                            <span class="text-[9px] uppercase text-slate-500 block font-semibold">Asist</span>
+                            <span class="text-sm font-black text-navy">${p.assists}</span>
+                        </div>
+                        <div class="bg-mist p-2 rounded-xl text-center">
+                            <span class="text-[9px] uppercase text-slate-500 block font-semibold">Body</span>
+                            <span class="text-sm font-black text-royal">${p.points}</span>
+                        </div>
+                        <div class="bg-mist p-2 rounded-xl text-center">
+                            <span class="text-[9px] uppercase text-slate-500 block font-semibold">+/-</span>
+                            <span class="text-sm font-black text-navy">${formatPlusMinus(p.plusMinus)}</span>
+                        </div>
+                    </div>
+                `;
+                mobileList.appendChild(card);
+            });
+        }
+
+        function filterPlayers() {
+            const searchEl = document.getElementById('playerSearch');
+            const sortEl = document.getElementById('sortBy');
+            const query = searchEl ? searchEl.value.toLowerCase() : '';
+            const sortBy = sortEl ? sortEl.value : 'points';
+
+            let filtered = playersData.filter(p => p.name.toLowerCase().includes(query));
+
+            filtered.sort((a, b) => {
+                if (sortBy === 'goals') return b.goals - a.goals || b.points - a.points;
+                if (sortBy === 'assists') return b.assists - a.assists || b.points - a.points;
+                if (sortBy === 'points') return b.points - a.points || b.goals - a.goals || b.plusMinus - a.plusMinus;
+                if (sortBy === 'plusMinus') return b.plusMinus - a.plusMinus || b.points - a.points;
+                if (sortBy === 'matches') return b.matches - a.matches || b.points - a.points;
+                return 0;
+            });
+
+            renderPlayers(filtered);
+        }
+
+        function renderMatches() {
+            const container = document.getElementById('matchesContainer');
+            if (!container) return;
+            container.innerHTML = '';
+
+            matchesData.forEach(m => {
+                const item = document.createElement('div');
+                item.className = "bg-white border border-slate-200 shadow-sm p-4 sm:p-5 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3";
+                item.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <span class="text-[11px] px-3 py-1 rounded-full bg-royal text-white font-bold uppercase">Výhra</span>
+                        <span class="text-xs text-slate-500">${m.date} (${m.note})</span>
+                    </div>
+                    <div class="flex items-center justify-between sm:justify-center flex-1 my-1 sm:my-0 px-2">
+                        <span class="text-sm font-extrabold text-right flex-1 text-navy">${m.home}</span>
+                        <span class="mx-4 font-display text-base sm:text-lg font-black px-4 py-1 bg-navy rounded-full text-white">${m.scoreHome} : ${m.scoreAway}</span>
+                        <span class="text-sm font-semibold text-left flex-1 text-slate-600">${m.away}</span>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function renderHero() {
+            const last = matchesData[matchesData.length - 1];
+            if (!last) return;
+            const eyebrow = document.getElementById('heroEyebrow');
+            const title = document.getElementById('heroTitle');
+            if (eyebrow) eyebrow.textContent = 'Výsledek zápasu  |  ' + last.date;
+
+            const diff = last.scoreHome - last.scoreAway;
+            const verb = diff > 0 ? 'porazili' : diff < 0 ? 'podlehli' : 'remizovali s';
+            if (title) title.textContent = `${last.home} ${verb} ${last.away} ${last.scoreHome}:${last.scoreAway}`;
+        }
+
+        window.onload = function() {
+            try {
+                const ctx = document.getElementById('resultsChart');
+                if (ctx) {
+                    new Chart(ctx.getContext('2d'), {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['Výhry', 'Remízy', 'Prohry'],
+                            datasets: [{
+                                data: [2, 0, 0],
+                                backgroundColor: ['#0b4cd1', '#cbd5e1', '#04163f'],
+                                borderWidth: 0
+                            }]
+                        },
+                        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, cutout: '75%' }
+                    });
+                }
+            } catch (e) {}
+
+            renderHero();
+            filterPlayers();
+            renderMatches();
+
+            const searchInput = document.getElementById('playerSearch');
+            const sortSelect = document.getElementById('sortBy');
+            if (searchInput) searchInput.addEventListener('input', filterPlayers);
+            if (sortSelect) sortSelect.addEventListener('change', filterPlayers);
+        };
+    </script>
+</body>
+</html>
