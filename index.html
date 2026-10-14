@@ -58,6 +58,30 @@
         }
         .section-title { position: relative; padding-left: 14px; }
         .section-title::before { content: ""; position: absolute; left: 0; top: 2px; bottom: 2px; width: 5px; border-radius: 3px; background: #0b4cd1; }
+
+        /* Překlápěcí odpočet (jako nádražní tabule) */
+        .flipclock { --w: clamp(30px, 7.4vw, 58px); --h: calc(var(--w) * 1.42); }
+        .fd { position: relative; width: var(--w); height: var(--h); perspective: calc(var(--h) * 4);
+              font-family: 'Montserrat', -apple-system, Arial, sans-serif; font-weight: 800; font-size: calc(var(--h) * .64);
+              color: #f8fafc; font-variant-numeric: tabular-nums; }
+        .fd .half, .fd .flap, .fd .face { position: absolute; left: 0; right: 0; overflow: hidden; }
+        .fd .half { height: 50%; }
+        .fd .t, .fd .face.front { top: 0; border-radius: 6px 6px 0 0; background: linear-gradient(#1a3270, #0f2150); }
+        .fd .b, .fd .face.back { bottom: 0; border-radius: 0 0 6px 6px; background: linear-gradient(#0c1a44, #071030); }
+        .fd .half span, .fd .face span { position: absolute; left: 0; right: 0; height: var(--h); line-height: var(--h); text-align: center; }
+        .fd .t span, .fd .face.front span { top: 0; }
+        .fd .b span, .fd .face.back span { top: calc(var(--h) / -2); }
+        .fd .flap { top: 0; height: 50%; overflow: visible; transform-origin: 50% 100%; transform-style: preserve-3d; display: none; z-index: 3; }
+        .fd .flap.go { display: block; animation: flipdown .55s ease-in forwards; }
+        .fd .face { top: 0; bottom: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+        .fd .face.back { top: 0; bottom: 0; transform: rotateX(180deg); }
+        .fd::after { content: ""; position: absolute; left: 0; right: 0; top: calc(50% - 1px); height: 2px; background: #02081c; z-index: 4; }
+        .fd::before { content: ""; position: absolute; inset: 0; border-radius: 6px; box-shadow: 0 6px 14px rgba(0,0,0,.35); z-index: 0; }
+        @keyframes flipdown { from { transform: rotateX(0deg); } to { transform: rotateX(-180deg); } }
+        .fc-colon { height: var(--h); display: flex; flex-direction: column; justify-content: center; gap: calc(var(--h) * .16); }
+        .fc-colon i { display: block; width: 5px; height: 5px; border-radius: 50%; background: rgba(255,255,255,.55); }
+        .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+        @media (prefers-reduced-motion: reduce) { .fd .flap.go { animation: none; display: none; } }
     </style>
 </head>
 <body class="min-h-full flex flex-col pb-20 md:pb-0 selection:bg-royal selection:text-white">
@@ -241,6 +265,29 @@
                             </g>
                         </svg>
                     </div>
+                </div>
+            </section>
+
+            <!-- Odpočet do dalšího zápasu -->
+            <section class="bg-navy text-white" aria-label="Odpočet do dalšího zápasu">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                    <div>
+                        <p class="font-display font-extrabold uppercase text-xs tracking-[.2em] text-bright flex items-center gap-2">
+                            <span class="inline-block w-2 h-2 rounded-full bg-bright animate-pulse"></span> Další zápas
+                        </p>
+                        <p id="nextMatchDate" class="font-display font-extrabold text-2xl sm:text-3xl mt-2">21. 10. 2026 &middot; 18:00</p>
+                        <p id="nextMatchState" class="text-sm text-white/65 mt-1">Do výkopu zbývá</p>
+                    </div>
+                    <div class="flipclock flex items-start gap-3 sm:gap-5 self-start lg:self-auto" role="timer" aria-live="off">
+                        <div class="flex flex-col items-center gap-2"><div id="fcDays" class="flex gap-1"></div><span class="text-[10px] sm:text-xs uppercase tracking-widest text-white/60 font-semibold">dní</span></div>
+                        <div class="fc-colon" aria-hidden="true"><i></i><i></i></div>
+                        <div class="flex flex-col items-center gap-2"><div id="fcHours" class="flex gap-1"></div><span class="text-[10px] sm:text-xs uppercase tracking-widest text-white/60 font-semibold">hodin</span></div>
+                        <div class="fc-colon" aria-hidden="true"><i></i><i></i></div>
+                        <div class="flex flex-col items-center gap-2"><div id="fcMinutes" class="flex gap-1"></div><span class="text-[10px] sm:text-xs uppercase tracking-widest text-white/60 font-semibold">minut</span></div>
+                        <div class="fc-colon" aria-hidden="true"><i></i><i></i></div>
+                        <div class="flex flex-col items-center gap-2"><div id="fcSeconds" class="flex gap-1"></div><span class="text-[10px] sm:text-xs uppercase tracking-widest text-white/60 font-semibold">sekund</span></div>
+                    </div>
+                    <span id="fcSr" class="sr-only"></span>
                 </div>
             </section>
 
@@ -631,6 +678,100 @@
             if (title) title.textContent = `${last.home} ${verb} ${last.away} ${last.scoreHome}:${last.scoreAway}`;
         }
 
+
+        // ---- Odpočet do dalšího zápasu (21. 10. 2026, 18:00 pražského času, letní čas = +02:00) ----
+        const NEXT_MATCH = new Date('2026-10-21T18:00:00+02:00');
+        const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        function createDigit(value) {
+            const el = document.createElement('div');
+            el.className = 'fd';
+            el.innerHTML = '<div class="half t"><span></span></div><div class="half b"><span></span></div>' +
+                '<div class="flap"><div class="face front"><span></span></div><div class="face back"><span></span></div></div>';
+            const q = sel => el.querySelector(sel);
+            const d = {
+                el, value,
+                top: q('.t span'), bottom: q('.b span'),
+                flap: q('.flap'), front: q('.face.front span'), back: q('.face.back span')
+            };
+            d.top.textContent = d.bottom.textContent = d.front.textContent = d.back.textContent = value;
+            d.flap.addEventListener('animationend', () => {
+                d.bottom.textContent = d.value;
+                d.flap.classList.remove('go');
+            });
+            return d;
+        }
+
+        function setDigit(d, value) {
+            value = String(value);
+            if (d.value === value) return;
+            const old = d.value;
+            d.value = value;
+            d.top.textContent = value;
+            if (reduceMotion) {
+                d.bottom.textContent = value;
+                return;
+            }
+            d.front.textContent = old;
+            d.back.textContent = value;
+            d.bottom.textContent = old;
+            d.flap.classList.remove('go');
+            void d.flap.offsetWidth;
+            d.flap.classList.add('go');
+        }
+
+        const flipGroups = {};
+
+        function setGroup(key, number, minDigits) {
+            const str = String(number).padStart(minDigits, '0');
+            const host = document.getElementById(key);
+            if (!host) return;
+            let g = flipGroups[key];
+            if (!g || g.length !== str.length) {
+                host.innerHTML = '';
+                g = flipGroups[key] = [...str].map(ch => {
+                    const d = createDigit(ch);
+                    host.appendChild(d.el);
+                    return d;
+                });
+                return;
+            }
+            [...str].forEach((ch, i) => setDigit(g[i], ch));
+        }
+
+        function tickCountdown() {
+            let diff = Math.max(0, NEXT_MATCH.getTime() - Date.now());
+            const days = Math.floor(diff / 86400000); diff -= days * 86400000;
+            const hours = Math.floor(diff / 3600000); diff -= hours * 3600000;
+            const minutes = Math.floor(diff / 60000); diff -= minutes * 60000;
+            const seconds = Math.floor(diff / 1000);
+            setGroup('fcDays', days, 2);
+            setGroup('fcHours', hours, 2);
+            setGroup('fcMinutes', minutes, 2);
+            setGroup('fcSeconds', seconds, 2);
+
+            const state = document.getElementById('nextMatchState');
+            const finished = NEXT_MATCH.getTime() <= Date.now();
+            if (state) state.textContent = finished ? 'Zápas právě začal' : 'Do výkopu zbývá';
+
+            const sr = document.getElementById('fcSr');
+            if (sr && seconds === 0) sr.textContent = finished ? 'Zápas právě začal.' : `Do zápasu zbývá ${days} dní, ${hours} hodin a ${minutes} minut.`;
+            return finished;
+        }
+
+        function startCountdown() {
+            const dateEl = document.getElementById('nextMatchDate');
+            if (dateEl) {
+                try {
+                    const day = NEXT_MATCH.toLocaleDateString('cs-CZ', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Prague' });
+                    const time = NEXT_MATCH.toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Prague' });
+                    dateEl.textContent = day.charAt(0).toUpperCase() + day.slice(1) + ' \u00b7 ' + time;
+                } catch (e) {}
+            }
+            if (tickCountdown()) return;
+            const timer = setInterval(() => { if (tickCountdown()) clearInterval(timer); }, 250);
+        }
+
         window.onload = function() {
             try {
                 const ctx = document.getElementById('resultsChart');
@@ -651,6 +792,7 @@
             } catch (e) {}
 
             renderHero();
+            startCountdown();
             filterPlayers();
             renderMatches();
 
