@@ -489,7 +489,7 @@
                                 </ul>
                             </div>
                         </div>
-                        <p class="text-xs text-slate-500">Hospodská data a rozhodující góly zatím nejsou kompletní. Hráč bez záznamu má standardní násobič &times;1,0 a žádnou pokutu. Přerušovaný štítek &times;1,5? znamená, že hráč měl násobič jen v části zápasů a použije se, až budou známé jeho statistiky po zápasech.</p>
+                        <p class="text-xs text-slate-500">Násobič se počítá zvlášť pro každý zápas, vynásobí se jen body z toho zápasu, ve kterém byl Aktivní Šmakec nebo Ultrašmakec. Hospodská data a rozhodující góly zatím nejsou kompletní. Hráč bez záznamu má standardní násobič &times;1,0 a žádnou pokutu.</p>
                     </div>
                 </details>
 
@@ -601,7 +601,19 @@
         // goalies = brankáři. Brankářům se +/- nepočítá, v zápisu totiž není, kdo stál v brance u kterého gólu.
         const matchesData = [
             { date: "Zápas 1", home: "Kaštánci", away: "Kapitáni", scoreHome: 5, scoreAway: 0, note: "Poločas 3:0" },
-            { date: "Zápas 2", home: "Kaštánci", away: "Real Dejvice", scoreHome: 8, scoreAway: 0, note: "Poločas 1:0" },
+            {
+                date: "Zápas 2", home: "Kaštánci", away: "Real Dejvice", scoreHome: 8, scoreAway: 0, note: "Poločas 1:0",
+                events: [
+                    { score: "1:0", scorer: "Tuňák", assist: "Vojta", onIce: ["Dave", "Jurgi"] },
+                    { score: "2:0", scorer: "Raďas", assist: "Dave", onIce: ["Řízek", "Patrik"] },
+                    { score: "3:0", scorer: "Řízek", assist: "Vojta", onIce: ["Raďas", "Jurgi"] },
+                    { score: "4:0", scorer: "Raďas", assist: "Patrik", onIce: ["Dave", "Dan"] },
+                    { score: "5:0", scorer: "Tuňák", assist: "Jurgi", onIce: ["Dan", "Patrik"] },
+                    { score: "6:0", scorer: "Raďas", assist: "Jurgi", onIce: ["Patrik", "Dave"] },
+                    { score: "7:0", scorer: "Dave", assist: null, onIce: ["Patrik", "Řízek", "Vojta"] },
+                    { score: "8:0", scorer: "Jurgi", assist: null, onIce: ["Raďas", "Dave", "Luboš"] }
+                ]
+            },
             {
                 date: "Zápas 3", home: "Kaštánci", away: "Zápas zrušen B", scoreHome: 12, scoreAway: 1, note: "Poločas 4:0",
                 goalies: ["Kuba", "Luboš"],
@@ -624,11 +636,15 @@
         ];
 
         // ---------- Hráči ----------
-        // Souhrnné statistiky ze zápasů 1 a 2 (zápis po zápasech zatím není). Od zápasu 3 se statistiky počítají ze zápisu v matchesData.
-        // Volitelná pole:
-        //   pub   - třetí poločas po zápasech: { číslo zápasu: 'standard' | 'active' | 'ultra' | 'none' }
-        //           standard = x1,0 · active = Aktivní Šmakec x1,5 · ultra = Ultrašmakec x2,0 · none = domů bez hospody (-4). Bez záznamu = standard.
-        //   split - rozpis zápasů 1 a 2 zvlášť { 1: { goals, assists, plusMinus }, 2: { ... } }; nahradí souhrn a násobič se pak počítá přesně.
+        // Přezdívky a jiná jména ze zápisů -> jméno hráče v tabulce
+        const PLAYER_ALIASES = { 'Tuňák': 'Tůmič' };
+        const canon = n => PLAYER_ALIASES[n] || n;
+
+        // Souhrnné statistiky ze zápasů 1 a 2 dohromady. Zápas 2 má zápis, takže se 1. zápas dopočítá jako rozdíl (souhrn - zápas 2).
+        // Až bude zápis i k 1. zápasu, přidej ho do matchesData a dopočet se přestane používat.
+        // Volitelné pole:
+        //   pub - třetí poločas po zápasech: { číslo zápasu: 'standard' | 'active' | 'ultra' | 'none' }
+        //         standard = x1,0 · active = Aktivní Šmakec x1,5 · ultra = Ultrašmakec x2,0 · none = domů bez hospody (-4). Bez záznamu = standard.
         const earlyPlayers = [
             { name: 'Raďas', matches: 2, goals: 4, assists: 0, plusMinus: 6, pub: { 2: 'active' } },
             { name: 'Vojta', matches: 2, goals: 0, assists: 4, plusMinus: 5 },
@@ -643,10 +659,9 @@
         ];
 
         function buildPlayers() {
-            const empty = () => ({ matches: 0, goals: 0, assists: 0, plusMinus: 0, decisiveGoals: 0 });
             const map = new Map();
             const get = name => {
-                if (!map.has(name)) map.set(name, { name, pub: {}, early: empty(), byMatch: {} });
+                if (!map.has(name)) map.set(name, { name, pub: {}, byMatch: {} });
                 return map.get(name);
             };
             const line = (name, no) => {
@@ -654,36 +669,45 @@
                 return p.byMatch[no] || (p.byMatch[no] = { goals: 0, assists: 0, plusMinus: 0, decisiveGoals: 0 });
             };
 
-            earlyPlayers.forEach(e => {
-                const p = get(e.name);
-                p.pub = e.pub || {};
-                if (e.split) {
-                    Object.entries(e.split).forEach(([no, st]) => Object.assign(line(e.name, no), { decisiveGoals: 0 }, st));
-                } else {
-                    p.early = { matches: e.matches, goals: e.goals, assists: e.assists, plusMinus: e.plusMinus, decisiveGoals: e.decisiveGoals || 0 };
-                }
-            });
-
+            // statistiky ze zápisů zápasů
             matchesData.forEach((m, i) => {
                 if (!m.events) return;
                 const no = i + 1;
-                (m.goalies || []).forEach(n => line(n, no));
+                (m.goalies || []).forEach(n => line(canon(n), no));
                 m.events.forEach(e => {
-                    e.onIce.forEach(n => { line(n, no).plusMinus += e.against ? -1 : 1; });
+                    e.onIce.forEach(n => { line(canon(n), no).plusMinus += e.against ? -1 : 1; });
                     if (e.against) return;
-                    const scorer = line(e.scorer, no);
+                    const scorer = line(canon(e.scorer), no);
                     scorer.goals++; scorer.plusMinus++;
                     if (e.decisive) scorer.decisiveGoals++;
-                    if (e.assist) { const a = line(e.assist, no); a.assists++; a.plusMinus++; }
+                    if (e.assist) { const a = line(canon(e.assist), no); a.assists++; a.plusMinus++; }
                 });
             });
 
+            // zápasy 1-2 bez zápisu: zbytek souhrnu = zápas, který nemá zápis
+            const noSheet = [1, 2].filter(n => !matchesData[n - 1].events);
+            earlyPlayers.forEach(e => {
+                const p = get(e.name);
+                p.pub = e.pub || {};
+                if (noSheet.length !== 1) return;
+                const withSheet = [1, 2].filter(n => n !== noSheet[0]);
+                const used = withSheet.map(n => p.byMatch[n]).filter(Boolean);
+                const rest = {
+                    goals: e.goals - used.reduce((t, x) => t + x.goals, 0),
+                    assists: e.assists - used.reduce((t, x) => t + x.assists, 0),
+                    plusMinus: e.plusMinus - used.reduce((t, x) => t + x.plusMinus, 0),
+                    decisiveGoals: 0
+                };
+                const played = e.matches - used.length >= 1 || rest.goals || rest.assists || rest.plusMinus;
+                if (played) p.byMatch[noSheet[0]] = rest;
+            });
+
             return [...map.values()].map(p => {
-                const parts = [p.early, ...Object.values(p.byMatch)];
+                const parts = Object.values(p.byMatch);
                 const sum = k => parts.reduce((t, x) => t + x[k], 0);
                 return {
                     ...p,
-                    matches: p.early.matches + Object.keys(p.byMatch).length,
+                    matches: parts.length,
                     goals: sum('goals'), assists: sum('assists'), plusMinus: sum('plusMinus'), decisiveGoals: sum('decisiveGoals'),
                     points: sum('goals') + sum('assists')
                 };
@@ -692,10 +716,10 @@
 
         const playersData = buildPlayers();
 
-        // ---------- Šmakec index: (3·G + 2·A + (+/-) + 4·RG) × násobič − 4·pokuty ----------
+        // ---------- Šmakec index: součet za jednotlivé zápasy ----------
+        // za zápas: (3·G + 2·A + (+/-) + 4·RG) × násobič tohoto zápasu; od součtu se odečítá 4 body za každý odchod domů bez hospody
         const SMAKEC = { goal: 3, assist: 2, decisiveBonus: 4, penalty: 4 };
         const TIER_MULT = { standard: 1, active: 1.5, ultra: 2, none: 1 };
-        const EARLY_MATCHES = [1, 2];
 
         function matchBase(m) {
             return SMAKEC.goal * m.goals + SMAKEC.assist * m.assists + m.plusMinus + SMAKEC.decisiveBonus * (m.decisiveGoals || 0);
@@ -705,34 +729,19 @@
             return Object.values(p.pub || {}).filter(t => t === tier).length;
         }
 
-        // Vrací { value, mult, penalty, pending }
-        // pending = hráč měl násobič jen v části zápasů 1-2 a chybí rozpis po zápasech (pole split), násobič se zatím nepoužije
+        // Vrací { value, mult, penalty, perMatch }, mult = nejvyšší násobič, který hráč v sezóně měl
         function smakecDetail(p) {
             const pub = p.pub || {};
-            let value = 0, mult = 1, pending = false;
-            const track = t => { mult = Math.max(mult, TIER_MULT[t]); };
-
-            if (p.early.matches > 0) {
-                const base = matchBase(p.early);
-                const tiers = EARLY_MATCHES.map(n => pub[n]).filter(Boolean);
-                const special = tiers.filter(t => TIER_MULT[t] !== 1);
-                const exact = special.length > 0 && (p.early.matches === 1 || (tiers.length === p.early.matches && new Set(tiers).size === 1));
-                if (exact) {
-                    value += base * TIER_MULT[special[0]];
-                    track(special[0]);
-                } else {
-                    value += base;
-                    if (special.length) { pending = true; special.forEach(track); }
-                }
-            }
+            let value = 0, mult = 1;
+            const perMatch = {};
             Object.entries(p.byMatch).forEach(([no, st]) => {
                 const t = pub[no] || 'standard';
-                value += matchBase(st) * TIER_MULT[t];
-                track(t);
+                perMatch[no] = matchBase(st) * TIER_MULT[t];
+                value += perMatch[no];
+                mult = Math.max(mult, TIER_MULT[t]);
             });
-
             const penalty = SMAKEC.penalty * pubCount(p, 'none');
-            return { value: Math.round((value - penalty) * 10) / 10, mult, penalty, pending };
+            return { value: Math.round((value - penalty) * 10) / 10, mult, penalty, perMatch };
         }
 
         function smakecIndex(p) {
@@ -746,8 +755,7 @@
         function smakecBadges(p) {
             const d = smakecDetail(p);
             let out = '';
-            if (d.mult !== 1 && !d.pending) out += `<span class="ml-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-royal text-white">\u00d7${formatNumber(d.mult)}</span>`;
-            if (d.pending) out += `<span title="Násobič se použije, až budou známé statistiky hráče po jednotlivých zápasech" class="ml-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full border border-dashed border-royal text-royal">\u00d7${formatNumber(d.mult)}?</span>`;
+            if (d.mult !== 1) out += `<span title="Nejvyšší hospodský násobič v sezóně" class="ml-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-royal text-white">\u00d7${formatNumber(d.mult)}</span>`;
             if (d.penalty) out += `<span class="ml-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-navy text-white">\u2212${d.penalty}</span>`;
             return out;
         }
@@ -958,13 +966,13 @@
                 if (m.events) {
                     const rows = m.events.map(e => e.against
                         ? `<li class="flex items-baseline gap-3"><span class="font-display font-extrabold text-navy w-12 shrink-0">${e.score}</span><span class="text-slate-500">Gól soupeře</span></li>`
-                        : `<li class="flex items-baseline gap-3"><span class="font-display font-extrabold text-royal w-12 shrink-0">${e.score}</span><span><b class="text-navy">${e.scorer}</b>${e.assist ? ` <span class="text-slate-500">(${e.assist})</span>` : ''}${e.decisive ? ' <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-navy text-white">rozhodující</span>' : ''}</span></li>`
+                        : `<li class="flex items-baseline gap-3"><span class="font-display font-extrabold text-royal w-12 shrink-0">${e.score}</span><span><b class="text-navy">${canon(e.scorer)}</b>${e.assist ? ` <span class="text-slate-500">(${canon(e.assist)})</span>` : ''}${e.decisive ? ' <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-navy text-white">rozhodující</span>' : ''}</span></li>`
                     ).join('');
                     log = `
                         <details class="mt-4 pt-4 border-t border-slate-100">
                             <summary class="cursor-pointer text-xs font-bold uppercase tracking-wide text-royal">Zápis zápasu &middot; ${goalsFor} ${plural(goalsFor, 'gól', 'góly', 'gólů')}, ${goalsAgainst} ${plural(goalsAgainst, 'inkasovaný', 'inkasované', 'inkasovaných')}</summary>
                             <ul class="mt-3 space-y-1.5 text-sm">${rows}</ul>
-                            ${m.goalies ? `<p class="mt-3 text-xs text-slate-500">Brankáři: ${m.goalies.join(', ')}</p>` : ''}
+                            ${m.goalies ? `<p class="mt-3 text-xs text-slate-500">Brankáři: ${m.goalies.map(canon).join(', ')}</p>` : ''}
                         </details>`;
                 }
 
