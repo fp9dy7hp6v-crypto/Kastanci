@@ -480,7 +480,7 @@
                     </summary>
                     <div class="px-4 sm:px-5 pb-5 space-y-5 text-sm text-slate-700">
                         <p>Jednotný přepočet, který zohledňuje komplexitu hráče na hřišti i mimo něj.</p>
-                        <p class="font-display font-extrabold text-navy bg-mist rounded-xl px-4 py-3 text-sm sm:text-base">Šmakec index = (3 &middot; G + 2 &middot; A + (+/&minus;) + 4 &middot; RG) &times; násobič &minus; 4 &middot; pokuty</p>
+                        <p class="font-display font-extrabold text-navy bg-mist rounded-xl px-4 py-3 text-sm sm:text-base">Šmakec index = (3 &middot; G + 2 &middot; A + (+/&minus;) + 4 &middot; RG + 3 &middot; ČP &minus; 2 &middot; IG) &times; násobič &minus; 4 &middot; pokuty</p>
                         <div class="grid md:grid-cols-2 gap-5">
                             <div>
                                 <h3 class="font-display font-extrabold uppercase text-xs tracking-wider text-royal mb-2">1. Sportovní základ (hřiště)</h3>
@@ -489,6 +489,7 @@
                                     <li><b class="text-navy">Asistence:</b> 2 body</li>
                                     <li><b class="text-navy">+/&minus; body:</b> reálná bilance účasti na hřišti (např. +2 nebo &minus;1)</li>
                                     <li><b class="text-navy">Rozhodující gól (RG):</b> +4 body navíc k běžnému gólu, autor vítězné trefy tedy získá z daného gólu celkem 7 bodů</li>
+                                    <li><b class="text-navy">Brankář:</b> +3 body za každý odchytaný poločas bez inkasovaného gólu (ČP), &minus;2 body za každý inkasovaný gól (IG). Brankáři se +/&minus; nepočítá. Kdo v zápase hraje i chytá, má body z pole i z brány sečtené</li>
                                 </ul>
                             </div>
                             <div>
@@ -704,13 +705,30 @@
             ];
         }
 
-        // Hráči (v poli): statistiky za každý zápas zvlášť. Brankáři se tu nepočítají.
+        // Statistiky brankáře za jeho část zápasu: { halves, conceded, clean }
+        function stintStats(m, st) {
+            const conceded = st.events.filter(e => e.against);
+            let clean;
+            if (st.halves === 1) {
+                clean = conceded.length === 0 ? 1 : 0;
+            } else {
+                // celý zápas: čistá konta počítáme zvlášť pro 1. a 2. poločas
+                const firstHalfGoals = m.half.split(':').reduce((t, x) => t + Number(x), 0);
+                const inFirst = conceded.filter(e => m.events.indexOf(e) < firstHalfGoals).length;
+                clean = (inFirst === 0 ? 1 : 0) + (conceded.length - inFirst === 0 ? 1 : 0);
+            }
+            return { halves: st.halves, conceded: conceded.length, clean };
+        }
+
+        // Hráči: statistiky za každý zápas zvlášť. Pole: G, A, +/- (brankářům se +/- nepočítá). Brána: odchytané poločasy.
         function buildPlayers() {
             const map = new Map();
-            const line = (name, no) => {
+            const line = (name, no, inField = true) => {
                 if (!map.has(name)) map.set(name, { name, pub: PUB[name] || {}, byMatch: {} });
                 const p = map.get(name);
-                return p.byMatch[no] || (p.byMatch[no] = { goals: 0, assists: 0, plusMinus: 0, decisiveGoals: 0 });
+                const l = p.byMatch[no] || (p.byMatch[no] = { goals: 0, assists: 0, plusMinus: 0, decisiveGoals: 0, field: false, gkHalves: 0, gkConceded: 0, gkClean: 0 });
+                if (inField) l.field = true;
+                return l;
             };
 
             matchesData.forEach((m, i) => {
@@ -730,6 +748,11 @@
                     if (e === decisive) scorer.decisiveGoals++;
                     if (e.assist) line(canon(e.assist), no).assists++;
                 });
+                goalieStints(m).forEach(st => {
+                    const g = stintStats(m, st);
+                    const l = line(st.name, no, false);
+                    l.gkHalves += g.halves; l.gkConceded += g.conceded; l.gkClean += g.clean;
+                });
             });
 
             return [...map.values()].map(p => {
@@ -738,8 +761,10 @@
                 return {
                     ...p,
                     matches: parts.length,
+                    fieldMatches: parts.filter(x => x.field).length,
                     goals: sum('goals'), assists: sum('assists'), plusMinus: sum('plusMinus'), decisiveGoals: sum('decisiveGoals'),
-                    points: sum('goals') + sum('assists')
+                    points: sum('goals') + sum('assists'),
+                    gkHalves: sum('gkHalves')
                 };
             });
         }
@@ -751,17 +776,8 @@
                 goalieStints(m).forEach(st => {
                     if (!map.has(st.name)) map.set(st.name, { name: st.name, halves: 0, conceded: 0, cleanHalves: 0 });
                     const gk = map.get(st.name);
-                    const conceded = st.events.filter(e => e.against);
-                    gk.halves += st.halves;
-                    gk.conceded += conceded.length;
-                    if (st.halves === 1) {
-                        gk.cleanHalves += conceded.length === 0 ? 1 : 0;
-                    } else {
-                        // celý zápas: čistá konta počítáme zvlášť pro 1. a 2. poločas
-                        const firstHalfGoals = m.half.split(':').reduce((t, x) => t + Number(x), 0);
-                        const inFirst = conceded.filter(e => m.events.indexOf(e) < firstHalfGoals).length;
-                        gk.cleanHalves += (inFirst === 0 ? 1 : 0) + (conceded.length - inFirst === 0 ? 1 : 0);
-                    }
+                    const g = stintStats(m, st);
+                    gk.halves += g.halves; gk.conceded += g.conceded; gk.cleanHalves += g.clean;
                 });
             });
             return [...map.values()].sort((a, b) => b.halves - a.halves || a.conceded - b.conceded);
@@ -771,12 +787,14 @@
         const goaliesData = buildGoalies();
 
         // ---------- Šmakec index: součet za jednotlivé zápasy ----------
-        // za zápas: (3·G + 2·A + (+/-) + 4·RG) × násobič tohoto zápasu; od součtu se odečítá 4 body za každý odchod domů bez hospody
-        const SMAKEC = { goal: 3, assist: 2, decisiveBonus: 4, penalty: 4 };
+        // za zápas: (3·G + 2·A + (+/-) + 4·RG + 3·čistý poločas v brance − 2·inkasovaný gól) × násobič tohoto zápasu; od součtu se odečítá 4 body za každý odchod domů bez hospody
+        const SMAKEC = { goal: 3, assist: 2, decisiveBonus: 4, cleanHalf: 3, concededGoal: 2, penalty: 4 };
         const TIER_MULT = { standard: 1, active: 1.5, ultra: 2, none: 1 };
 
+        // body za zápas: pole (G, A, +/-, RG) + brána (čistý poločas, inkasované góly); násobič se pak počítá z celého zápasu
         function matchBase(m) {
-            return SMAKEC.goal * m.goals + SMAKEC.assist * m.assists + m.plusMinus + SMAKEC.decisiveBonus * (m.decisiveGoals || 0);
+            return SMAKEC.goal * m.goals + SMAKEC.assist * m.assists + m.plusMinus + SMAKEC.decisiveBonus * (m.decisiveGoals || 0)
+                + SMAKEC.cleanHalf * (m.gkClean || 0) - SMAKEC.concededGoal * (m.gkConceded || 0);
         }
 
         function pubCount(p, tier) {
@@ -897,6 +915,14 @@
             return v > 0 ? '+' + v : String(v);
         }
 
+        const dash = '<span class="text-slate-300">&ndash;</span>';
+
+        function gkBadge(p) {
+            return p.gkHalves
+                ? `<span title="Odchytané poločasy" class="ml-2 align-middle text-[10px] font-bold px-1.5 py-0.5 rounded-full border border-royal text-royal">v brance ${p.gkHalves} pol.</span>`
+                : '';
+        }
+
         function renderPlayers(players) {
             const tableBody = document.getElementById('playersTableBody');
             const mobileList = document.getElementById('playersMobileList');
@@ -910,12 +936,12 @@
                 row.className = 'hover:bg-mist transition-colors';
                 row.innerHTML = `
                     <td class="py-3.5 px-4 font-bold text-slate-400">${idx + 1}.</td>
-                    <td class="py-3.5 px-4 font-extrabold text-navy">${p.name}</td>
+                    <td class="py-3.5 px-4 font-extrabold text-navy whitespace-nowrap">${p.name}${gkBadge(p)}</td>
                     <td class="py-3.5 px-4 text-center">${p.matches}</td>
-                    <td class="py-3.5 px-4 text-center font-bold text-royal">${p.goals}</td>
-                    <td class="py-3.5 px-4 text-center font-bold text-navy">${p.assists}</td>
-                    <td class="py-3.5 px-4 text-center font-black text-royal">${p.points}</td>
-                    <td class="py-3.5 px-4 text-center font-bold text-navy">${formatPlusMinus(p.plusMinus)}</td>
+                    <td class="py-3.5 px-4 text-center font-bold text-royal">${p.fieldMatches ? p.goals : dash}</td>
+                    <td class="py-3.5 px-4 text-center font-bold text-navy">${p.fieldMatches ? p.assists : dash}</td>
+                    <td class="py-3.5 px-4 text-center font-black text-royal">${p.fieldMatches ? p.points : dash}</td>
+                    <td class="py-3.5 px-4 text-center font-bold text-navy">${p.fieldMatches ? formatPlusMinus(p.plusMinus) : dash}</td>
                     <td class="py-3.5 px-4 text-center whitespace-nowrap"><span class="font-display font-black text-base text-navy">${formatNumber(smakecIndex(p))}</span>${smakecBadges(p)}</td>
                     <td class="py-3.5 px-4 text-center font-display font-black text-base text-royal">${formatNumber(smakecPerMatch(p))}</td>
                     <td class="py-3.5 px-4 text-center font-bold text-royal">${pubCount(p, 'active') || '<span class="text-slate-300">&ndash;</span>'}</td>
@@ -929,26 +955,26 @@
                     <div class="flex justify-between items-center">
                         <div class="flex items-center space-x-2.5">
                             <span class="w-7 h-7 rounded-full bg-royal text-white font-bold text-xs flex items-center justify-center">${idx + 1}</span>
-                            <h3 class="font-extrabold text-navy text-base">${p.name}</h3>
+                            <h3 class="font-extrabold text-navy text-base">${p.name}${gkBadge(p)}</h3>
                         </div>
-                        <span class="text-xs text-slate-500">${p.matches} zápasy</span>
+                        <span class="text-xs text-slate-500">${p.matches} ${plural(p.matches, 'zápas', 'zápasy', 'zápasů')}</span>
                     </div>
                     <div class="grid grid-cols-4 gap-2 pt-3 border-t border-slate-100">
                         <div class="bg-mist p-2 rounded-xl text-center">
                             <span class="text-[9px] uppercase text-slate-500 block font-semibold">Góly</span>
-                            <span class="text-sm font-black text-royal">${p.goals}</span>
+                            <span class="text-sm font-black text-royal">${p.fieldMatches ? p.goals : dash}</span>
                         </div>
                         <div class="bg-mist p-2 rounded-xl text-center">
                             <span class="text-[9px] uppercase text-slate-500 block font-semibold">Asist</span>
-                            <span class="text-sm font-black text-navy">${p.assists}</span>
+                            <span class="text-sm font-black text-navy">${p.fieldMatches ? p.assists : dash}</span>
                         </div>
                         <div class="bg-mist p-2 rounded-xl text-center">
                             <span class="text-[9px] uppercase text-slate-500 block font-semibold">Body</span>
-                            <span class="text-sm font-black text-royal">${p.points}</span>
+                            <span class="text-sm font-black text-royal">${p.fieldMatches ? p.points : dash}</span>
                         </div>
                         <div class="bg-mist p-2 rounded-xl text-center">
                             <span class="text-[9px] uppercase text-slate-500 block font-semibold">+/-</span>
-                            <span class="text-sm font-black text-navy">${formatPlusMinus(p.plusMinus)}</span>
+                            <span class="text-sm font-black text-navy">${p.fieldMatches ? formatPlusMinus(p.plusMinus) : dash}</span>
                         </div>
                     </div>
                     <div class="flex items-center justify-between bg-navy text-white rounded-xl px-3 py-2">
