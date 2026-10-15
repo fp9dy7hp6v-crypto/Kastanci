@@ -475,7 +475,7 @@
                                 <ul class="space-y-1.5">
                                     <li><b class="text-navy">Gól:</b> 3 body</li>
                                     <li><b class="text-navy">Asistence:</b> 2 body</li>
-                                    <li><b class="text-navy">+/&minus; body:</b> reálná bilance účasti na hřišti (např. +2 nebo &minus;1)</li>
+                                    <li><b class="text-navy">+/&minus; body:</b> reálná bilance účasti na hřišti (např. +2 nebo &minus;1), brankáři ji mají za svůj poločas</li>
                                     <li><b class="text-navy">Rozhodující gól (RG):</b> +4 body navíc k běžnému gólu, autor vítězné trefy tedy získá z daného gólu celkem 7 bodů</li>
                                 </ul>
                             </div>
@@ -598,11 +598,23 @@
         // events = zápis zápasu: gól Kaštánků { score, scorer, assist, onIce } (onIce = ostatní hráči v poli, bez střelce a asistenta)
         //          gól soupeře { score, against: true, onIce } (onIce = 4 hráči v poli)
         //          decisive: true u rozhodujícího gólu (střelec dostane +4 body navíc)
-        // goalies = brankáři. Brankářům se +/- nepočítá, v zápisu totiž není, kdo stál v brance u kterého gólu.
+        // goalies = brankáři. Jeden brankář chytal celý zápas, dva se vystřídali po poločase (half = skóre v poločase).
+        //            Brankář má +/- za gólové situace ve své půlce, stejně jako hráči v poli.
         const matchesData = [
-            { date: "Zápas 1", home: "Kaštánci", away: "Kapitáni", scoreHome: 5, scoreAway: 0, note: "Poločas 3:0" },
+            {
+                date: "Zápas 1", home: "Kaštánci", away: "Kapitáni", scoreHome: 5, scoreAway: 0, note: "Poločas 3:0", half: "3:0",
+                goalies: ["Hákáč", "Smrky"],
+                events: [
+                    { score: "1:0", scorer: "Dan", assist: "Vojta", onIce: ["Patrik", "Řízek"] },
+                    { score: "2:0", scorer: "Patrik", assist: null, onIce: ["Lubos", "Dave", "Řízek"] },
+                    { score: "3:0", scorer: "Raďas", assist: "Kuba", onIce: ["Vojta", "Dan"] },
+                    { score: "4:0", scorer: "Kuba", assist: "Řízek", onIce: ["Patrik", "Tuňák"] },
+                    { score: "5:0", scorer: "Lubos", assist: "Vojta", onIce: ["Jurgi", "Dan"] }
+                ]
+            },
             {
                 date: "Zápas 2", home: "Kaštánci", away: "Real Dejvice", scoreHome: 8, scoreAway: 0, note: "Poločas 1:0",
+                goalies: ["Smrky"],
                 events: [
                     { score: "1:0", scorer: "Tuňák", assist: "Vojta", onIce: ["Dave", "Jurgi"] },
                     { score: "2:0", scorer: "Raďas", assist: "Dave", onIce: ["Řízek", "Patrik"] },
@@ -615,7 +627,7 @@
                 ]
             },
             {
-                date: "Zápas 3", home: "Kaštánci", away: "Zápas zrušen B", scoreHome: 12, scoreAway: 1, note: "Poločas 4:0",
+                date: "Zápas 3", home: "Kaštánci", away: "Zápas zrušen B", scoreHome: 12, scoreAway: 1, note: "Poločas 4:0", half: "4:0",
                 goalies: ["Kuba", "Luboš"],
                 events: [
                     { score: "1:0", scorer: "Jurgi", assist: null, onIce: ["Raďas", "Dan", "Karel"] },
@@ -636,70 +648,53 @@
         ];
 
         // ---------- Hráči ----------
-        // Přezdívky a jiná jména ze zápisů -> jméno hráče v tabulce
-        const PLAYER_ALIASES = { 'Tuňák': 'Tůmič' };
+        // Statistiky se počítají ze zápisů zápasů (matchesData). Přezdívky a jiná jména ze zápisů -> jméno hráče v tabulce:
+        const PLAYER_ALIASES = { 'Tuňák': 'Tůmič', 'Lubos': 'Luboš' };
         const canon = n => PLAYER_ALIASES[n] || n;
 
-        // Souhrnné statistiky ze zápasů 1 a 2 dohromady. Zápas 2 má zápis, takže se 1. zápas dopočítá jako rozdíl (souhrn - zápas 2).
-        // Až bude zápis i k 1. zápasu, přidej ho do matchesData a dopočet se přestane používat.
-        // Volitelné pole:
-        //   pub - třetí poločas po zápasech: { číslo zápasu: 'standard' | 'active' | 'ultra' | 'none' }
-        //         standard = x1,0 · active = Aktivní Šmakec x1,5 · ultra = Ultrašmakec x2,0 · none = domů bez hospody (-4). Bez záznamu = standard.
-        const earlyPlayers = [
-            { name: 'Raďas', matches: 2, goals: 4, assists: 0, plusMinus: 6, pub: { 2: 'active' } },
-            { name: 'Vojta', matches: 2, goals: 0, assists: 4, plusMinus: 5 },
-            { name: 'Jurgi', matches: 2, goals: 1, assists: 2, plusMinus: 6 },
-            { name: 'Patrik', matches: 2, goals: 1, assists: 1, plusMinus: 8 },
-            { name: 'Dave', matches: 2, goals: 1, assists: 1, plusMinus: 7 },
-            { name: 'Řízek', matches: 2, goals: 1, assists: 1, plusMinus: 5 },
-            { name: 'Tůmič', matches: 2, goals: 2, assists: 0, plusMinus: 3 },
-            { name: 'Kuba', matches: 1, goals: 1, assists: 1, plusMinus: 2 },
-            { name: 'Dan', matches: 2, goals: 1, assists: 0, plusMinus: 5 },
-            { name: 'Luboš', matches: 1, goals: 1, assists: 0, plusMinus: 2, pub: { 1: 'ultra' } }
-        ];
+        // Třetí poločas po zápasech: { číslo zápasu: 'standard' | 'active' | 'ultra' | 'none' }
+        //   standard = x1,0 · active = Aktivní Šmakec x1,5 · ultra = Ultrašmakec x2,0 · none = domů bez hospody (-4)
+        // Bez záznamu = standard.
+        const PUB = {
+            'Raďas': { 2: 'active' },
+            'Luboš': { 1: 'ultra' }
+        };
+
+        function goalieFor(m, index) {
+            const g = m.goalies || [];
+            if (g.length < 2 || !m.half) return g[0];
+            const firstHalfGoals = m.half.split(':').reduce((t, x) => t + Number(x), 0);
+            return index < firstHalfGoals ? g[0] : g[1];
+        }
 
         function buildPlayers() {
             const map = new Map();
-            const get = name => {
-                if (!map.has(name)) map.set(name, { name, pub: {}, byMatch: {} });
-                return map.get(name);
-            };
             const line = (name, no) => {
-                const p = get(name);
+                if (!map.has(name)) map.set(name, { name, pub: PUB[name] || {}, byMatch: {} });
+                const p = map.get(name);
                 return p.byMatch[no] || (p.byMatch[no] = { goals: 0, assists: 0, plusMinus: 0, decisiveGoals: 0 });
             };
 
-            // statistiky ze zápisů zápasů
             matchesData.forEach((m, i) => {
                 if (!m.events) return;
                 const no = i + 1;
                 (m.goalies || []).forEach(n => line(canon(n), no));
-                m.events.forEach(e => {
-                    e.onIce.forEach(n => { line(canon(n), no).plusMinus += e.against ? -1 : 1; });
+                m.events.forEach((e, idx) => {
+                    // všichni, kdo byli na hřišti (každý jen jednou, brankář mohl být i v seznamu hráčů)
+                    const onPitch = new Set(e.onIce.map(canon));
+                    const goalie = goalieFor(m, idx);
+                    if (goalie) onPitch.add(canon(goalie));
+                    if (!e.against) {
+                        onPitch.add(canon(e.scorer));
+                        if (e.assist) onPitch.add(canon(e.assist));
+                    }
+                    onPitch.forEach(n => { line(n, no).plusMinus += e.against ? -1 : 1; });
                     if (e.against) return;
                     const scorer = line(canon(e.scorer), no);
-                    scorer.goals++; scorer.plusMinus++;
+                    scorer.goals++;
                     if (e.decisive) scorer.decisiveGoals++;
-                    if (e.assist) { const a = line(canon(e.assist), no); a.assists++; a.plusMinus++; }
+                    if (e.assist) line(canon(e.assist), no).assists++;
                 });
-            });
-
-            // zápasy 1-2 bez zápisu: zbytek souhrnu = zápas, který nemá zápis
-            const noSheet = [1, 2].filter(n => !matchesData[n - 1].events);
-            earlyPlayers.forEach(e => {
-                const p = get(e.name);
-                p.pub = e.pub || {};
-                if (noSheet.length !== 1) return;
-                const withSheet = [1, 2].filter(n => n !== noSheet[0]);
-                const used = withSheet.map(n => p.byMatch[n]).filter(Boolean);
-                const rest = {
-                    goals: e.goals - used.reduce((t, x) => t + x.goals, 0),
-                    assists: e.assists - used.reduce((t, x) => t + x.assists, 0),
-                    plusMinus: e.plusMinus - used.reduce((t, x) => t + x.plusMinus, 0),
-                    decisiveGoals: 0
-                };
-                const played = e.matches - used.length >= 1 || rest.goals || rest.assists || rest.plusMinus;
-                if (played) p.byMatch[noSheet[0]] = rest;
             });
 
             return [...map.values()].map(p => {
@@ -972,7 +967,7 @@
                         <details class="mt-4 pt-4 border-t border-slate-100">
                             <summary class="cursor-pointer text-xs font-bold uppercase tracking-wide text-royal">Zápis zápasu &middot; ${goalsFor} ${plural(goalsFor, 'gól', 'góly', 'gólů')}, ${goalsAgainst} ${plural(goalsAgainst, 'inkasovaný', 'inkasované', 'inkasovaných')}</summary>
                             <ul class="mt-3 space-y-1.5 text-sm">${rows}</ul>
-                            ${m.goalies ? `<p class="mt-3 text-xs text-slate-500">Brankáři: ${m.goalies.map(canon).join(', ')}</p>` : ''}
+                            ${m.goalies ? `<p class="mt-3 text-xs text-slate-500">${m.goalies.length > 1 ? `Brankáři: ${canon(m.goalies[0])} (1. poločas), ${canon(m.goalies[1])} (2. poločas)` : `Brankář: ${canon(m.goalies[0])}`}</p>` : ''}
                         </details>`;
                 }
 
