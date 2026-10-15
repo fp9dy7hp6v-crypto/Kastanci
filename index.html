@@ -90,7 +90,7 @@
     <div class="bg-black text-white text-[11px] font-semibold uppercase tracking-wider">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-10 flex items-center justify-between">
             <span class="font-display">Sezóna 2025/2026</span>
-            <span class="font-display text-white/70"><i class="fa-solid fa-circle text-[6px] text-bright align-middle mr-2"></i>2 zápasy &middot; 2 výhry</span>
+            <span class="font-display text-white/70"><i class="fa-solid fa-circle text-[6px] text-bright align-middle mr-2"></i><span id="topRecord">2 zápasy &middot; 2 výhry</span></span>
         </div>
     </div>
 
@@ -98,7 +98,7 @@
     <button type="button" data-tab="matches" class="block w-full bg-bright hover:bg-royal transition-colors text-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-12 flex items-center justify-center gap-3 font-display font-extrabold uppercase text-xs sm:text-sm tracking-wide">
             <i class="fa-solid fa-trophy"></i>
-            <span>Vítězný start: 2 výhry, skóre 13:0</span>
+            <span id="promoText">Vítězný start: 2 výhry, skóre 13:0</span>
             <span class="w-6 h-6 rounded-full border-2 border-white flex items-center justify-center text-[10px]"><i class="fa-solid fa-chevron-right"></i></span>
         </div>
     </button>
@@ -158,7 +158,7 @@
                             </h1>
                             <p id="heroNote" class="mt-4 text-white/90 text-lg sm:text-xl font-semibold">
                                 Čili teď jsou v Kozičce a slaví!!
-                                <span class="block text-sm font-medium text-white/65 mt-1">Data k zápasu ještě doplňujeme.</span>
+                                <span class="block text-sm font-medium text-white/65 mt-1">Zápis zápasu je doplněný. <button type="button" data-tab="matches" class="underline underline-offset-4 hover:text-white">Průběh gólů</button> a <button type="button" data-tab="players" class="underline underline-offset-4 hover:text-white">statistiky hráčů</button>.</span>
                             </p>
                             <div class="mt-7 flex flex-wrap items-center gap-3">
                                 <button type="button" data-tab="matches" class="pill rounded-full px-5 py-2.5 text-sm font-semibold inline-flex items-center gap-2">
@@ -303,28 +303,28 @@
                         <div class="bg-mist border border-royal/10 p-4 sm:p-5 rounded-2xl">
                             <span class="text-xs text-slate-500 font-semibold uppercase tracking-wide">Odehrané zápasy</span>
                             <div class="flex items-baseline justify-between mt-3">
-                                <span class="font-display text-3xl sm:text-4xl font-black text-navy">2</span>
-                                <span class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-royal text-white">100% výhry</span>
+                                <span id="statPlayed" class="font-display text-3xl sm:text-4xl font-black text-navy">2</span>
+                                <span id="statWinRate" class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-royal text-white">100% výhry</span>
                             </div>
                         </div>
                         <div class="bg-mist border border-royal/10 p-4 sm:p-5 rounded-2xl">
                             <span class="text-xs text-slate-500 font-semibold uppercase tracking-wide">Získané body</span>
                             <div class="flex items-baseline justify-between mt-3">
-                                <span class="font-display text-3xl sm:text-4xl font-black text-navy">6</span>
-                                <span class="text-xs text-slate-500">z 6 možných</span>
+                                <span id="statPoints" class="font-display text-3xl sm:text-4xl font-black text-navy">6</span>
+                                <span id="statPointsMax" class="text-xs text-slate-500">z 6 možných</span>
                             </div>
                         </div>
                         <div class="bg-mist border border-royal/10 p-4 sm:p-5 rounded-2xl">
                             <span class="text-xs text-slate-500 font-semibold uppercase tracking-wide">Skóre klub</span>
                             <div class="flex items-baseline justify-between mt-3">
-                                <span class="font-display text-3xl sm:text-4xl font-black text-navy">13:0</span>
-                                <span class="text-xs font-bold text-royal">+13</span>
+                                <span id="statScore" class="font-display text-3xl sm:text-4xl font-black text-navy">13:0</span>
+                                <span id="statDiff" class="text-xs font-bold text-royal">+13</span>
                             </div>
                         </div>
                         <div class="bg-mist border border-royal/10 p-4 sm:p-5 rounded-2xl">
                             <span class="text-xs text-slate-500 font-semibold uppercase tracking-wide">Průměr gólů/zápas</span>
                             <div class="flex items-baseline justify-between mt-3">
-                                <span class="font-display text-3xl sm:text-4xl font-black text-navy">6.5</span>
+                                <span id="statAvg" class="font-display text-3xl sm:text-4xl font-black text-navy">6.5</span>
                                 <span class="text-xs text-slate-500">G/Z</span>
                             </div>
                         </div>
@@ -343,15 +343,15 @@
                         <div class="flex justify-around text-center pt-4 border-t border-slate-200 mt-2">
                             <div>
                                 <span class="block text-xs text-slate-500">Výhry</span>
-                                <span class="font-display text-lg font-extrabold text-royal">2</span>
+                                <span id="balWins" class="font-display text-lg font-extrabold text-royal">2</span>
                             </div>
                             <div>
                                 <span class="block text-xs text-slate-500">Remízy</span>
-                                <span class="font-display text-lg font-extrabold text-slate-400">0</span>
+                                <span id="balDraws" class="font-display text-lg font-extrabold text-slate-400">0</span>
                             </div>
                             <div>
                                 <span class="block text-xs text-slate-500">Prohry</span>
-                                <span class="font-display text-lg font-extrabold text-navy">0</span>
+                                <span id="balLosses" class="font-display text-lg font-extrabold text-navy">0</span>
                             </div>
                         </div>
                     </div>
@@ -369,8 +369,8 @@
                                 </div>
                                 <div class="min-w-0 flex-1">
                                     <span class="text-[10px] font-extrabold uppercase tracking-wider text-royal block">Nejlepší střelec</span>
-                                    <p class="text-sm font-extrabold text-navy truncate">Raďas</p>
-                                    <p class="text-xs text-slate-500">4 góly (2 zápasy)</p>
+                                    <p id="leaderScorerName" class="text-sm font-extrabold text-navy truncate">Raďas</p>
+                                    <p id="leaderScorerValue" class="text-xs text-slate-500">4 góly</p>
                                 </div>
                             </div>
 
@@ -380,8 +380,8 @@
                                 </div>
                                 <div class="min-w-0 flex-1">
                                     <span class="text-[10px] font-extrabold uppercase tracking-wider text-royal block">Nejlepší nahrávač</span>
-                                    <p class="text-sm font-extrabold text-navy truncate">Vojta</p>
-                                    <p class="text-xs text-slate-500">4 asistence</p>
+                                    <p id="leaderAssistName" class="text-sm font-extrabold text-navy truncate">Vojta</p>
+                                    <p id="leaderAssistValue" class="text-xs text-slate-500">4 asistence</p>
                                 </div>
                             </div>
 
@@ -391,8 +391,8 @@
                                 </div>
                                 <div class="min-w-0 flex-1">
                                     <span class="text-[10px] font-extrabold uppercase tracking-wider text-royal block">Nejlepší +/-</span>
-                                    <p class="text-sm font-extrabold text-navy truncate">Patrik</p>
-                                    <p class="text-xs text-slate-500">+8 bodů</p>
+                                    <p id="leaderPmName" class="text-sm font-extrabold text-navy truncate">Patrik</p>
+                                    <p id="leaderPmValue" class="text-xs text-slate-500">+8 bodů</p>
                                 </div>
                             </div>
                             <div class="p-4 rounded-2xl bg-navy text-white flex items-center space-x-3">
@@ -594,19 +594,111 @@
         const LEAGUE_URL = 'https://strahovskaliga.cz/Liga/?LID=4';
         const TEAM_URL = 'https://strahovskaliga.cz/TymProfil/?TID=8832';
 
-        // Šmakec index: (3·G + 2·A + (+/-) + 4·RG) × násobič − 4·pokuty
-        // Volitelná pole hráče:
-        //   decisiveGoals - počet rozhodujících gólů celkem (výchozí 0)
-        //   pub           - třetí poločas po zápasech: { číslo zápasu: 'standard' | 'active' | 'ultra' | 'none' }
-        //                   standard = ×1,0 · active = Aktivní Šmakec ×1,5 · ultra = Ultrašmakec ×2,0 · none = domů bez hospody (-4)
-        //                   Hráč bez záznamu má standard.
-        //   log           - volitelný rozpis po zápasech [{ match, goals, assists, plusMinus, decisiveGoals }].
-        //                   Když existuje, násobič se použije přesně na každý zápas zvlášť.
+        // ---------- Zápasy ----------
+        // events = zápis zápasu: gól Kaštánků { score, scorer, assist, onIce } (onIce = ostatní hráči v poli, bez střelce a asistenta)
+        //          gól soupeře { score, against: true, onIce } (onIce = 4 hráči v poli)
+        //          decisive: true u rozhodujícího gólu (střelec dostane +4 body navíc)
+        // goalies = brankáři. Brankářům se +/- nepočítá, v zápisu totiž není, kdo stál v brance u kterého gólu.
+        const matchesData = [
+            { date: "Zápas 1", home: "Kaštánci", away: "Kapitáni", scoreHome: 5, scoreAway: 0, note: "Poločas 3:0" },
+            { date: "Zápas 2", home: "Kaštánci", away: "Real Dejvice", scoreHome: 8, scoreAway: 0, note: "Poločas 1:0" },
+            {
+                date: "Zápas 3", home: "Kaštánci", away: "Zápas zrušen B", scoreHome: 12, scoreAway: 1, note: "Poločas 4:0",
+                goalies: ["Kuba R", "Luboš"],
+                events: [
+                    { score: "1:0", scorer: "Jurgi", assist: null, onIce: ["Raďas", "Dan", "Karel"] },
+                    { score: "2:0", scorer: "Tůmič", assist: "Dave", onIce: ["Jurgi", "Dan"] },
+                    { score: "3:0", scorer: "Karel", assist: "Raďas", onIce: ["Dan", "Vojta"] },
+                    { score: "4:0", scorer: "Dave", assist: "Tůmič", onIce: ["Karel", "Luboš"] },
+                    { score: "4:1", against: true, onIce: ["Raďas", "Dan", "Jurgi", "Luboš"] },
+                    { score: "5:1", scorer: "Karel", assist: "Dan", onIce: ["Raďas", "Vojta"] },
+                    { score: "6:1", scorer: "Karel", assist: "Tůmič", onIce: ["Raďas", "Dave"] },
+                    { score: "7:1", scorer: "Kuba R", assist: "Vojta", onIce: ["Dan", "Tůmič"] },
+                    { score: "8:1", scorer: "Dave", assist: "Vojta", onIce: ["Raďas", "Dan"] },
+                    { score: "9:1", scorer: "Dave", assist: "Tůmič", onIce: ["Jurgi", "Karel"] },
+                    { score: "10:1", scorer: "Vojta", assist: "Raďas", onIce: ["Dan", "Karel"] },
+                    { score: "11:1", scorer: "Karel", assist: "Vojta", onIce: ["Dan", "Tůmič"] },
+                    { score: "12:1", scorer: "Kuba R", assist: "Jurgi", onIce: ["Karel", "Tůmič"] }
+                ]
+            }
+        ];
+
+        // ---------- Hráči ----------
+        // Souhrnné statistiky ze zápasů 1 a 2 (zápis po zápasech zatím není). Od zápasu 3 se statistiky počítají ze zápisu v matchesData.
+        // Volitelná pole:
+        //   pub   - třetí poločas po zápasech: { číslo zápasu: 'standard' | 'active' | 'ultra' | 'none' }
+        //           standard = x1,0 · active = Aktivní Šmakec x1,5 · ultra = Ultrašmakec x2,0 · none = domů bez hospody (-4). Bez záznamu = standard.
+        //   split - rozpis zápasů 1 a 2 zvlášť { 1: { goals, assists, plusMinus }, 2: { ... } }; nahradí souhrn a násobič se pak počítá přesně.
+        const earlyPlayers = [
+            { name: 'Raďas', matches: 2, goals: 4, assists: 0, plusMinus: 6, pub: { 2: 'active' } },
+            { name: 'Vojta', matches: 2, goals: 0, assists: 4, plusMinus: 5 },
+            { name: 'Jurgi', matches: 2, goals: 1, assists: 2, plusMinus: 6 },
+            { name: 'Patrik', matches: 2, goals: 1, assists: 1, plusMinus: 8 },
+            { name: 'Dave', matches: 2, goals: 1, assists: 1, plusMinus: 7 },
+            { name: 'Řízek', matches: 2, goals: 1, assists: 1, plusMinus: 5 },
+            { name: 'Tůmič', matches: 2, goals: 2, assists: 0, plusMinus: 3 },
+            { name: 'Kuba', matches: 1, goals: 1, assists: 1, plusMinus: 2 },
+            { name: 'Dan', matches: 2, goals: 1, assists: 0, plusMinus: 5 },
+            { name: 'Luboš', matches: 1, goals: 1, assists: 0, plusMinus: 2, pub: { 1: 'ultra' } }
+        ];
+
+        function buildPlayers() {
+            const empty = () => ({ matches: 0, goals: 0, assists: 0, plusMinus: 0, decisiveGoals: 0 });
+            const map = new Map();
+            const get = name => {
+                if (!map.has(name)) map.set(name, { name, pub: {}, early: empty(), byMatch: {} });
+                return map.get(name);
+            };
+            const line = (name, no) => {
+                const p = get(name);
+                return p.byMatch[no] || (p.byMatch[no] = { goals: 0, assists: 0, plusMinus: 0, decisiveGoals: 0 });
+            };
+
+            earlyPlayers.forEach(e => {
+                const p = get(e.name);
+                p.pub = e.pub || {};
+                if (e.split) {
+                    Object.entries(e.split).forEach(([no, st]) => Object.assign(line(e.name, no), { decisiveGoals: 0 }, st));
+                } else {
+                    p.early = { matches: e.matches, goals: e.goals, assists: e.assists, plusMinus: e.plusMinus, decisiveGoals: e.decisiveGoals || 0 };
+                }
+            });
+
+            matchesData.forEach((m, i) => {
+                if (!m.events) return;
+                const no = i + 1;
+                (m.goalies || []).forEach(n => line(n, no));
+                m.events.forEach(e => {
+                    e.onIce.forEach(n => { line(n, no).plusMinus += e.against ? -1 : 1; });
+                    if (e.against) return;
+                    const scorer = line(e.scorer, no);
+                    scorer.goals++; scorer.plusMinus++;
+                    if (e.decisive) scorer.decisiveGoals++;
+                    if (e.assist) { const a = line(e.assist, no); a.assists++; a.plusMinus++; }
+                });
+            });
+
+            return [...map.values()].map(p => {
+                const parts = [p.early, ...Object.values(p.byMatch)];
+                const sum = k => parts.reduce((t, x) => t + x[k], 0);
+                return {
+                    ...p,
+                    matches: p.early.matches + Object.keys(p.byMatch).length,
+                    goals: sum('goals'), assists: sum('assists'), plusMinus: sum('plusMinus'), decisiveGoals: sum('decisiveGoals'),
+                    points: sum('goals') + sum('assists')
+                };
+            });
+        }
+
+        const playersData = buildPlayers();
+
+        // ---------- Šmakec index: (3·G + 2·A + (+/-) + 4·RG) × násobič − 4·pokuty ----------
         const SMAKEC = { goal: 3, assist: 2, decisiveBonus: 4, penalty: 4 };
         const TIER_MULT = { standard: 1, active: 1.5, ultra: 2, none: 1 };
+        const EARLY_MATCHES = [1, 2];
 
-        function smakecBase(p) {
-            return SMAKEC.goal * p.goals + SMAKEC.assist * p.assists + p.plusMinus + SMAKEC.decisiveBonus * (p.decisiveGoals || 0);
+        function matchBase(m) {
+            return SMAKEC.goal * m.goals + SMAKEC.assist * m.assists + m.plusMinus + SMAKEC.decisiveBonus * (m.decisiveGoals || 0);
         }
 
         function pubCount(p, tier) {
@@ -614,28 +706,32 @@
         }
 
         // Vrací { value, mult, penalty, pending }
-        // pending = hráč má násobič jen v části zápasů a chybí rozpis po zápasech, násobič se zatím nepoužije
+        // pending = hráč měl násobič jen v části zápasů 1-2 a chybí rozpis po zápasech (pole split), násobič se zatím nepoužije
         function smakecDetail(p) {
             const pub = p.pub || {};
-            const tiers = Object.values(pub);
-            const penalty = SMAKEC.penalty * pubCount(p, 'none');
-            let value, mult = 1, pending = false;
+            let value = 0, mult = 1, pending = false;
+            const track = t => { mult = Math.max(mult, TIER_MULT[t]); };
 
-            if (p.log) {
-                value = p.log.reduce((sum, m) => sum + smakecBase(m) * TIER_MULT[pub[m.match] || 'standard'], 0);
-                mult = Math.max(1, ...p.log.map(m => TIER_MULT[pub[m.match] || 'standard']));
-            } else {
-                const base = smakecBase(p);
+            if (p.early.matches > 0) {
+                const base = matchBase(p.early);
+                const tiers = EARLY_MATCHES.map(n => pub[n]).filter(Boolean);
                 const special = tiers.filter(t => TIER_MULT[t] !== 1);
-                const coversAll = tiers.length === p.matches && new Set(tiers).size === 1;
-                if (special.length && (p.matches === 1 || coversAll)) {
-                    mult = TIER_MULT[special[0]];
-                    value = base * mult;
+                const exact = special.length > 0 && (p.early.matches === 1 || (tiers.length === p.early.matches && new Set(tiers).size === 1));
+                if (exact) {
+                    value += base * TIER_MULT[special[0]];
+                    track(special[0]);
                 } else {
-                    value = base;
-                    if (special.length) { pending = true; mult = Math.max(...special.map(t => TIER_MULT[t])); }
+                    value += base;
+                    if (special.length) { pending = true; special.forEach(track); }
                 }
             }
+            Object.entries(p.byMatch).forEach(([no, st]) => {
+                const t = pub[no] || 'standard';
+                value += matchBase(st) * TIER_MULT[t];
+                track(t);
+            });
+
+            const penalty = SMAKEC.penalty * pubCount(p, 'none');
             return { value: Math.round((value - penalty) * 10) / 10, mult, penalty, pending };
         }
 
@@ -656,23 +752,59 @@
             return out;
         }
 
-        const playersData = [
-            { name: 'Raďas', matches: 2, goals: 4, assists: 0, points: 4, plusMinus: 6, pub: { 2: 'active' } },
-            { name: 'Vojta', matches: 2, goals: 0, assists: 4, points: 4, plusMinus: 5 },
-            { name: 'Jurgi', matches: 2, goals: 1, assists: 2, points: 3, plusMinus: 6 },
-            { name: 'Patrik', matches: 2, goals: 1, assists: 1, points: 2, plusMinus: 8 },
-            { name: 'Dave', matches: 2, goals: 1, assists: 1, points: 2, plusMinus: 7 },
-            { name: 'Řízek', matches: 2, goals: 1, assists: 1, points: 2, plusMinus: 5 },
-            { name: 'Tůmič', matches: 2, goals: 2, assists: 0, points: 2, plusMinus: 3 },
-            { name: 'Kuba', matches: 1, goals: 1, assists: 1, points: 2, plusMinus: 2 },
-            { name: 'Dan', matches: 2, goals: 1, assists: 0, points: 1, plusMinus: 5 },
-            { name: 'Luboš', matches: 1, goals: 1, assists: 0, points: 1, plusMinus: 2, pub: { 1: 'ultra' } }
-        ];
+        // ---------- Statistiky sezóny ----------
+        function plural(n, one, few, many) {
+            return n === 1 ? one : (n >= 2 && n <= 4 ? few : many);
+        }
 
-        const matchesData = [
-            { date: "Zápas 1", home: "Kaštánci", away: "Kapitáni", scoreHome: 5, scoreAway: 0, note: "Poločas 3:0" },
-            { date: "Zápas 2", home: "Kaštánci", away: "Real Dejvice", scoreHome: 8, scoreAway: 0, note: "Poločas 1:0" }
-        ];
+        function seasonStats() {
+            const st = { played: matchesData.length, wins: 0, draws: 0, losses: 0, gf: 0, ga: 0 };
+            matchesData.forEach(m => {
+                st.gf += m.scoreHome; st.ga += m.scoreAway;
+                if (m.scoreHome > m.scoreAway) st.wins++; else if (m.scoreHome < m.scoreAway) st.losses++; else st.draws++;
+            });
+            st.points = st.wins * 3 + st.draws;
+            return st;
+        }
+
+        function setText(id, text) {
+            const el = document.getElementById(id);
+            if (el) el.textContent = text;
+        }
+
+        function renderSeasonStats() {
+            const st = seasonStats();
+            const diff = st.gf - st.ga;
+            setText('topRecord', `${st.played} ${plural(st.played, 'zápas', 'zápasy', 'zápasů')} \u00b7 ${st.wins} ${plural(st.wins, 'výhra', 'výhry', 'výher')}`);
+            setText('promoText', st.wins === st.played
+                ? `Vítězný start: ${st.wins} ${plural(st.wins, 'výhra', 'výhry', 'výher')}, skóre ${st.gf}:${st.ga}`
+                : `Sezóna: ${st.wins} ${plural(st.wins, 'výhra', 'výhry', 'výher')} ze ${st.played} zápasů, skóre ${st.gf}:${st.ga}`);
+            setText('statPlayed', st.played);
+            setText('statWinRate', Math.round(100 * st.wins / st.played) + '% výhry');
+            setText('statPoints', st.points);
+            setText('statPointsMax', `z ${st.played * 3} možných`);
+            setText('statScore', `${st.gf}:${st.ga}`);
+            setText('statDiff', (diff > 0 ? '+' : diff < 0 ? '\u2212' : '') + Math.abs(diff));
+            setText('statAvg', formatNumber(Math.round(st.gf / st.played * 10) / 10));
+            setText('balWins', st.wins);
+            setText('balDraws', st.draws);
+            setText('balLosses', st.losses);
+        }
+
+        function leadersBy(key) {
+            const max = Math.max(...playersData.map(p => p[key]));
+            return { max, names: playersData.filter(p => p[key] === max).map(p => p.name).join(', ') };
+        }
+
+        function renderLeaders() {
+            const g = leadersBy('goals'), a = leadersBy('assists'), pm = leadersBy('plusMinus');
+            setText('leaderScorerName', g.names);
+            setText('leaderScorerValue', `${g.max} ${plural(g.max, 'gól', 'góly', 'gólů')}`);
+            setText('leaderAssistName', a.names);
+            setText('leaderAssistValue', `${a.max} ${plural(a.max, 'asistence', 'asistence', 'asistencí')}`);
+            setText('leaderPmName', pm.names);
+            setText('leaderPmValue', `${pm.max > 0 ? '+' : ''}${pm.max} bodů`);
+        }
 
         function activateTab(tabName) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -817,25 +949,44 @@
             container.innerHTML = '';
 
             matchesData.forEach(m => {
+                const diff = m.scoreHome - m.scoreAway;
+                const result = diff > 0 ? ['Výhra', 'bg-royal'] : diff < 0 ? ['Prohra', 'bg-navy'] : ['Remíza', 'bg-slate-400'];
+                const goalsFor = m.events ? m.events.filter(e => !e.against).length : 0;
+                const goalsAgainst = m.events ? m.events.filter(e => e.against).length : 0;
+
+                let log = '';
+                if (m.events) {
+                    const rows = m.events.map(e => e.against
+                        ? `<li class="flex items-baseline gap-3"><span class="font-display font-extrabold text-navy w-12 shrink-0">${e.score}</span><span class="text-slate-500">Gól soupeře</span></li>`
+                        : `<li class="flex items-baseline gap-3"><span class="font-display font-extrabold text-royal w-12 shrink-0">${e.score}</span><span><b class="text-navy">${e.scorer}</b>${e.assist ? ` <span class="text-slate-500">(${e.assist})</span>` : ''}${e.decisive ? ' <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-navy text-white">rozhodující</span>' : ''}</span></li>`
+                    ).join('');
+                    log = `
+                        <details class="mt-4 pt-4 border-t border-slate-100">
+                            <summary class="cursor-pointer text-xs font-bold uppercase tracking-wide text-royal">Zápis zápasu &middot; ${goalsFor} ${plural(goalsFor, 'gól', 'góly', 'gólů')}, ${goalsAgainst} ${plural(goalsAgainst, 'inkasovaný', 'inkasované', 'inkasovaných')}</summary>
+                            <ul class="mt-3 space-y-1.5 text-sm">${rows}</ul>
+                            ${m.goalies ? `<p class="mt-3 text-xs text-slate-500">Brankáři: ${m.goalies.join(', ')}</p>` : ''}
+                        </details>`;
+                }
+
                 const item = document.createElement('div');
-                item.className = "bg-white border border-slate-200 shadow-sm p-4 sm:p-5 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3";
+                item.className = "bg-white border border-slate-200 shadow-sm p-4 sm:p-5 rounded-2xl";
                 item.innerHTML = `
-                    <div class="flex items-center space-x-3">
-                        <span class="text-[11px] px-3 py-1 rounded-full bg-royal text-white font-bold uppercase">Výhra</span>
-                        <span class="text-xs text-slate-500">${m.date} (${m.note})</span>
-                    </div>
-                    <div class="flex items-center justify-between sm:justify-center flex-1 my-1 sm:my-0 px-2">
-                        <span class="text-sm font-extrabold text-right flex-1 text-navy">${m.home}</span>
-                        <span class="mx-4 font-display text-base sm:text-lg font-black px-4 py-1 bg-navy rounded-full text-white">${m.scoreHome} : ${m.scoreAway}</span>
-                        <span class="text-sm font-semibold text-left flex-1 text-slate-600">${m.away}</span>
-                    </div>
-                    <a href="${TEAM_URL}" target="_blank" rel="noopener noreferrer" class="text-xs font-bold uppercase tracking-wide text-royal hover:text-navy whitespace-nowrap">V lize &#8599;</a>
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div class="flex items-center space-x-3">
+                            <span class="text-[11px] px-3 py-1 rounded-full ${result[1]} text-white font-bold uppercase">${result[0]}</span>
+                            <span class="text-xs text-slate-500">${m.date} (${m.note})</span>
+                        </div>
+                        <div class="flex items-center justify-between sm:justify-center flex-1 my-1 sm:my-0 px-2">
+                            <span class="text-sm font-extrabold text-right flex-1 text-navy">${m.home}</span>
+                            <span class="mx-4 font-display text-base sm:text-lg font-black px-4 py-1 bg-navy rounded-full text-white">${m.scoreHome} : ${m.scoreAway}</span>
+                            <span class="text-sm font-semibold text-left flex-1 text-slate-600">${m.away}</span>
+                        </div>
+                        <a href="${TEAM_URL}" target="_blank" rel="noopener noreferrer" class="text-xs font-bold uppercase tracking-wide text-royal hover:text-navy whitespace-nowrap">V lize &#8599;</a>
+                    </div>${log}
                 `;
                 container.appendChild(item);
             });
         }
-
-
 
         // ---- Odpočet do dalšího zápasu (21. 10. 2026, 18:00 pražského času, letní čas = +02:00) ----
         const NEXT_MATCH = new Date('2026-10-21T18:00:00+02:00');
@@ -939,7 +1090,7 @@
                         data: {
                             labels: ['Výhry', 'Remízy', 'Prohry'],
                             datasets: [{
-                                data: [2, 0, 0],
+                                data: [seasonStats().wins, seasonStats().draws, seasonStats().losses],
                                 backgroundColor: ['#0b4cd1', '#cbd5e1', '#04163f'],
                                 borderWidth: 0
                             }]
@@ -950,6 +1101,8 @@
             } catch (e) {}
 
             startCountdown();
+            renderSeasonStats();
+            renderLeaders();
             filterPlayers();
             renderSmakecLeader();
             renderPubStats();
