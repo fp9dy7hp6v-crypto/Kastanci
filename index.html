@@ -80,6 +80,7 @@
         @keyframes flipdown { from { transform: rotateX(0deg); } to { transform: rotateX(-180deg); } }
         .fc-colon { height: var(--h); display: flex; flex-direction: column; justify-content: center; gap: calc(var(--h) * .16); }
         .fc-colon i { display: block; width: 5px; height: 5px; border-radius: 50%; background: rgba(255,255,255,.55); }
+        [hidden] { display: none !important; }
         .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
         @media (prefers-reduced-motion: reduce) { .fd .flap.go { animation: none; display: none; } }
     </style>
@@ -282,7 +283,7 @@
                         <p id="nextMatchDate" class="font-display font-extrabold text-2xl sm:text-3xl mt-2">21. 10. 2026 &middot; 18:00</p>
                         <p id="nextMatchState" class="text-sm text-white/65 mt-1">Do výkopu zbývá</p>
                     </div>
-                    <div class="flipclock flex items-start gap-3 sm:gap-5 self-start lg:self-auto" role="timer" aria-live="off">
+                    <div class="flipclock flex items-start gap-3 sm:gap-5 self-start lg:self-auto" id="flipClock" role="timer" aria-live="off">
                         <div class="flex flex-col items-center gap-2"><div id="fcDays" class="flex gap-1"></div><span class="text-[10px] sm:text-xs uppercase tracking-widest text-white/60 font-semibold">dní</span></div>
                         <div class="fc-colon" aria-hidden="true"><i></i><i></i></div>
                         <div class="flex flex-col items-center gap-2"><div id="fcHours" class="flex gap-1"></div><span class="text-[10px] sm:text-xs uppercase tracking-widest text-white/60 font-semibold">hodin</span></div>
@@ -663,6 +664,26 @@
                     { score: "10:1", scorer: "Vojta", assist: "Raďas", onIce: ["Dan", "Karel"] },
                     { score: "11:1", scorer: "Karel", assist: "Vojta", onIce: ["Dan", "Tůmič"] },
                     { score: "12:1", scorer: "Kuba", assist: "Jurgi", onIce: ["Karel", "Tůmič"] }
+                ]
+            },
+            {
+                date: "Zápas 4", home: "Kaštánci", away: "Good Looks Clan", scoreHome: 4, scoreAway: 10, note: "Poločas 2:7", half: "2:7",
+                goalies: ["Smrky"],
+                events: [
+                    { score: "0:1", against: true, onIce: ["Mára", "Dan", "Vojta", "Kuba"] },
+                    { score: "0:2", against: true, onIce: ["Mára", "Dan", "Vojta", "Dave"] },
+                    { score: "1:2", scorer: "Jurgi", assist: null, onIce: ["Raďas", "Patrik", "Řízek"] },
+                    { score: "1:3", against: true, onIce: ["Vojta", "Kuba", "Patrik", "Řízek"] },
+                    { score: "1:4", against: true, onIce: ["Dan", "Raďas", "Patrik", "Řízek"] },
+                    { score: "1:5", against: true, onIce: ["Mára", "Patrik", "Řízek", "Jurgi"] },
+                    { score: "1:6", against: true, onIce: ["Mára", "Dave", "Patrik", "Jurgi"] },
+                    { score: "1:7", against: true, onIce: ["Dan", "Kuba", "Raďas", "Tůmič"] },
+                    { score: "2:7", scorer: "Řízek", assist: "Kuba", onIce: ["Raďas", "Tůmič"] },
+                    { score: "2:8", against: true, onIce: ["Dan", "Vojta", "Kuba", "Raďas"] },
+                    { score: "3:8", scorer: "Jurgi", assist: "Patrik", onIce: ["Raďas", "Tůmič"] },
+                    { score: "4:8", scorer: "Tůmič", assist: "Jurgi", onIce: ["Mára", "Patrik"] },
+                    { score: "4:9", against: true, onIce: ["Vojta", "Kuba", "Raďas", "Patrik"] },
+                    { score: "4:10", against: true, onIce: ["Mára", "Patrik", "Jurgi", "Tůmič"] }
                 ]
             }
         ];
@@ -1172,6 +1193,14 @@
         }
 
         function tickCountdown() {
+            // zápas skončil (počítáme 3 hodiny od výkopu): termín dalšího zápasu zatím neznáme
+            if (Date.now() > NEXT_MATCH.getTime() + 3 * 3600 * 1000) {
+                const clock = document.getElementById('flipClock');
+                if (clock) clock.hidden = true;
+                setText('nextMatchDate', 'Termín zatím neznáme');
+                setText('nextMatchState', 'Další zápas zatím nebyl vyhlášen.');
+                return true;
+            }
             let diff = Math.max(0, NEXT_MATCH.getTime() - Date.now());
             const days = Math.floor(diff / 86400000); diff -= days * 86400000;
             const hours = Math.floor(diff / 3600000); diff -= hours * 3600000;
