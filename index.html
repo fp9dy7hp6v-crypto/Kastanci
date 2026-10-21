@@ -490,7 +490,7 @@
                                     <li><b class="text-navy">Asistence:</b> 2 body</li>
                                     <li><b class="text-navy">+/&minus; body:</b> reálná bilance účasti na hřišti (např. +2 nebo &minus;1)</li>
                                     <li><b class="text-navy">Rozhodující gól (RG):</b> +4 body navíc k běžnému gólu, autor vítězné trefy tedy získá z daného gólu celkem 7 bodů</li>
-                                    <li><b class="text-navy">Brankář (B):</b> za každý odchytaný poločas polovina mediánu sportovních bodů hráčů v poli z téhož zápasu, takže má zhruba průměrný zápas a neovlivní ho, kolik gólů inkasoval celý tým. Brankáři se +/&minus; nepočítá. Kdo v zápase hraje i chytá, má body z pole i z brány sečtené</li>
+                                    <li><b class="text-navy">Brankář (B):</b> 3 body za každý odchytaný poločas, +1 za poločas bez inkasovaného gólu a &minus;0,5 za každý inkasovaný gól. Brankářům se +/&minus; nepočítá. Kdo v zápase hraje i chytá, má body z pole i z brány sečtené</li>
                                 </ul>
                             </div>
                             <div>
@@ -741,7 +741,7 @@
             return { halves: st.halves, conceded: conceded.length, clean };
         }
 
-        const SMAKEC = { goal: 3, assist: 2, decisiveBonus: 4, penalty: 4 };
+        const SMAKEC = { goal: 3, assist: 2, decisiveBonus: 4, gkHalf: 3, gkCleanHalf: 1, gkConceded: 0.5, penalty: 4 };
         const TIER_MULT = { standard: 1, active: 1.5, ultra: 2, none: 1 };
 
         // sportovní základ hráče v poli za zápas
@@ -749,15 +749,8 @@
             return SMAKEC.goal * m.goals + SMAKEC.assist * m.assists + m.plusMinus + SMAKEC.decisiveBonus * (m.decisiveGoals || 0);
         }
 
-        function median(values) {
-            const v = [...values].sort((a, b) => a - b);
-            const n = v.length;
-            if (!n) return 0;
-            return n % 2 ? v[(n - 1) / 2] : (v[n / 2 - 1] + v[n / 2]) / 2;
-        }
-
         // Hráči: statistiky za každý zápas zvlášť. Pole: G, A, +/- (brankářům se +/- nepočítá).
-        // Brána: za odchytaný poločas polovina mediánu sportovních bodů hráčů v poli z téhož zápasu.
+        // Brána: 3 body za odchytaný poločas, +1 za poločas bez inkasovaného gólu, -0,5 za každý inkasovaný gól.
         function buildPlayers() {
             const map = new Map();
             const line = (name, no, inField = true) => {
@@ -787,15 +780,15 @@
                 });
             });
 
-            // brankáři: body podle mediánu hráčů v poli v daném zápase
+            // brankáři: body za odchytané poločasy
             matchesData.forEach((m, i) => {
                 if (!m.events) return;
                 const no = i + 1;
-                const med = median([...map.values()].map(p => p.byMatch[no]).filter(l => l && l.field).map(fieldBase));
                 goalieStints(m).forEach(st => {
+                    const g = stintStats(m, st);
                     const l = line(st.name, no, false);
-                    l.gkHalves += st.halves;
-                    l.gkPoints += med * st.halves / 2;
+                    l.gkHalves += g.halves;
+                    l.gkPoints += SMAKEC.gkHalf * g.halves + SMAKEC.gkCleanHalf * g.clean - SMAKEC.gkConceded * g.conceded;
                 });
             });
 
