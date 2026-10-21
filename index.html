@@ -280,7 +280,7 @@
                         <p class="font-display font-extrabold uppercase text-xs tracking-[.2em] text-bright flex items-center gap-2">
                             <span class="inline-block w-2 h-2 rounded-full bg-bright animate-pulse"></span> Další zápas
                         </p>
-                        <p id="nextMatchDate" class="font-display font-extrabold text-2xl sm:text-3xl mt-2">21. 10. 2026 &middot; 18:00</p>
+                        <p id="nextMatchDate" class="font-display font-extrabold text-2xl sm:text-3xl mt-2">3. 11. 2026 &middot; 18:00</p>
                         <p id="nextMatchState" class="text-sm text-white/65 mt-1">Do výkopu zbývá</p>
                     </div>
                     <div class="flipclock flex items-start gap-3 sm:gap-5 self-start lg:self-auto" id="flipClock" role="timer" aria-live="off">
@@ -700,7 +700,7 @@
             'Raďas': { 2: 'active', 3: 'none' },
             'Luboš': { 1: 'ultra', 3: 'ultra' },
             'Tůmič': { 1: 'none', 2: 'none', 3: 'none' },
-            'Řízek': { 1: 'none', 2: 'none', 3: 'none' },
+            'Řízek': { 1: 'none', 2: 'none', 3: 'none', 4: 'none' },
             'Jurgi': { 3: 'ultra' },
             'Dave': { 3: 'ultra' },
             'Dan': { 3: 'ultra' },
@@ -1132,8 +1132,8 @@
             });
         }
 
-        // ---- Odpočet do dalšího zápasu (21. 10. 2026, 18:00 pražského času, letní čas = +02:00) ----
-        const NEXT_MATCH = new Date('2026-10-21T18:00:00+02:00');
+        // ---- Odpočet do dalšího zápasu (3. 11. 2026, 18:00 pražského času, zimní čas = +01:00) ----
+        const NEXT_MATCH = new Date('2026-11-03T18:00:00+01:00');
         const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
         function createDigit(value) {
