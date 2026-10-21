@@ -481,7 +481,7 @@
                     </summary>
                     <div class="px-4 sm:px-5 pb-5 space-y-5 text-sm text-slate-700">
                         <p>Jednotný přepočet, který zohledňuje komplexitu hráče na hřišti i mimo něj.</p>
-                        <p class="font-display font-extrabold text-navy bg-mist rounded-xl px-4 py-3 text-sm sm:text-base">Šmakec index = (3 &middot; G + 2 &middot; A + (+/&minus;) + 4 &middot; RG + 3 &middot; ČP &minus; 2 &middot; IG) &times; násobič &minus; 4 &middot; pokuty</p>
+                        <p class="font-display font-extrabold text-navy bg-mist rounded-xl px-4 py-3 text-sm sm:text-base">Šmakec index = (3 &middot; G + 2 &middot; A + (+/&minus;) + 4 &middot; RG + B) &times; násobič &minus; 4 &middot; pokuty</p>
                         <div class="grid md:grid-cols-2 gap-5">
                             <div>
                                 <h3 class="font-display font-extrabold uppercase text-xs tracking-wider text-royal mb-2">1. Sportovní základ (hřiště)</h3>
@@ -490,7 +490,7 @@
                                     <li><b class="text-navy">Asistence:</b> 2 body</li>
                                     <li><b class="text-navy">+/&minus; body:</b> reálná bilance účasti na hřišti (např. +2 nebo &minus;1)</li>
                                     <li><b class="text-navy">Rozhodující gól (RG):</b> +4 body navíc k běžnému gólu, autor vítězné trefy tedy získá z daného gólu celkem 7 bodů</li>
-                                    <li><b class="text-navy">Brankář:</b> +3 body za každý odchytaný poločas bez inkasovaného gólu (ČP), &minus;2 body za každý inkasovaný gól (IG). Brankáři se +/&minus; nepočítá. Kdo v zápase hraje i chytá, má body z pole i z brány sečtené</li>
+                                    <li><b class="text-navy">Brankář (B):</b> 3 body za každý odchytaný poločas, +1 za poločas bez inkasovaného gólu a &minus;0,5 za každý inkasovaný gól. Brankářům se +/&minus; nepočítá. Kdo v zápase hraje i chytá, má body z pole i z brány sečtené</li>
                                 </ul>
                             </div>
                             <div>
@@ -741,13 +741,22 @@
             return { halves: st.halves, conceded: conceded.length, clean };
         }
 
-        // Hráči: statistiky za každý zápas zvlášť. Pole: G, A, +/- (brankářům se +/- nepočítá). Brána: odchytané poločasy.
+        const SMAKEC = { goal: 3, assist: 2, decisiveBonus: 4, gkHalf: 3, gkCleanHalf: 1, gkConceded: 0.5, penalty: 4 };
+        const TIER_MULT = { standard: 1, active: 1.5, ultra: 2, none: 1 };
+
+        // sportovní základ hráče v poli za zápas
+        function fieldBase(m) {
+            return SMAKEC.goal * m.goals + SMAKEC.assist * m.assists + m.plusMinus + SMAKEC.decisiveBonus * (m.decisiveGoals || 0);
+        }
+
+        // Hráči: statistiky za každý zápas zvlášť. Pole: G, A, +/- (brankářům se +/- nepočítá).
+        // Brána: 3 body za odchytaný poločas, +1 za poločas bez inkasovaného gólu, -0,5 za každý inkasovaný gól.
         function buildPlayers() {
             const map = new Map();
             const line = (name, no, inField = true) => {
                 if (!map.has(name)) map.set(name, { name, pub: PUB[name] || {}, byMatch: {} });
                 const p = map.get(name);
-                const l = p.byMatch[no] || (p.byMatch[no] = { goals: 0, assists: 0, plusMinus: 0, decisiveGoals: 0, field: false, gkHalves: 0, gkConceded: 0, gkClean: 0 });
+                const l = p.byMatch[no] || (p.byMatch[no] = { goals: 0, assists: 0, plusMinus: 0, decisiveGoals: 0, field: false, gkHalves: 0, gkPoints: 0 });
                 if (inField) l.field = true;
                 return l;
             };
@@ -769,10 +778,17 @@
                     if (e === decisive) scorer.decisiveGoals++;
                     if (e.assist) line(canon(e.assist), no).assists++;
                 });
+            });
+
+            // brankáři: body za odchytané poločasy
+            matchesData.forEach((m, i) => {
+                if (!m.events) return;
+                const no = i + 1;
                 goalieStints(m).forEach(st => {
                     const g = stintStats(m, st);
                     const l = line(st.name, no, false);
-                    l.gkHalves += g.halves; l.gkConceded += g.conceded; l.gkClean += g.clean;
+                    l.gkHalves += g.halves;
+                    l.gkPoints += SMAKEC.gkHalf * g.halves + SMAKEC.gkCleanHalf * g.clean - SMAKEC.gkConceded * g.conceded;
                 });
             });
 
@@ -809,13 +825,9 @@
 
         // ---------- Šmakec index: součet za jednotlivé zápasy ----------
         // za zápas: (3·G + 2·A + (+/-) + 4·RG + 3·čistý poločas v brance − 2·inkasovaný gól) × násobič tohoto zápasu; od součtu se odečítá 4 body za každý odchod domů bez hospody
-        const SMAKEC = { goal: 3, assist: 2, decisiveBonus: 4, cleanHalf: 3, concededGoal: 2, penalty: 4 };
-        const TIER_MULT = { standard: 1, active: 1.5, ultra: 2, none: 1 };
-
-        // body za zápas: pole (G, A, +/-, RG) + brána (čistý poločas, inkasované góly); násobič se pak počítá z celého zápasu
+        // body za zápas: pole + brána; násobič se pak počítá z celého zápasu
         function matchBase(m) {
-            return SMAKEC.goal * m.goals + SMAKEC.assist * m.assists + m.plusMinus + SMAKEC.decisiveBonus * (m.decisiveGoals || 0)
-                + SMAKEC.cleanHalf * (m.gkClean || 0) - SMAKEC.concededGoal * (m.gkConceded || 0);
+            return fieldBase(m) + (m.gkPoints || 0);
         }
 
         function pubCount(p, tier) {
