@@ -152,14 +152,14 @@
 
                         <div class="relative max-w-3xl md:max-w-[calc(50vw-4rem)] md:pb-24 md:pl-0">
                             <p class="text-white font-display font-semibold uppercase text-sm md:text-base tracking-wide flex items-center gap-3">
-                                <span id="heroEyebrow">Aktualita</span><span class="text-white/40" aria-hidden="true">|</span><time datetime="2026-10-21">21. října 2026</time>
+                                <span id="heroEyebrow">Aktualita</span><span class="text-white/40" aria-hidden="true">|</span><time datetime="2026-11-03">3. listopadu 2026</time>
                             </p>
                             <h1 id="heroTitle" class="mt-4 text-white font-display font-extrabold uppercase text-4xl sm:text-5xl md:text-[42px] lg:text-[46px] leading-[1.08] tracking-tight">
-                                Kaštánci poprvé v sezóně prohráli, s Good Looks Clan 4:10
+                                Kaštánci se vrátili k výhrám: Ostré kulky 8:3
                             </h1>
                             <p id="heroNote" class="mt-4 text-white/90 text-lg sm:text-xl font-semibold">
-                                Jurgi přidal dva góly a asistenci, jediný hráč v plusu byl Tůmič (+1). Zápas rozhodl první poločas (2:7).
-                                <span class="block text-sm font-medium text-white/65 mt-1">Druhý poločas jsme prohráli už jen 2:3. Sezóna: 3 výhry a 1 prohra. <button type="button" data-tab="matches" class="underline underline-offset-4 hover:text-white">Průběh gólů</button> a <button type="button" data-tab="players" class="underline underline-offset-4 hover:text-white">statistiky hráčů</button>.</span>
+                                Čtyři góly dal Tůmič, který se tak s osmi góly stal nejlepším střelcem sezóny. První poločas jsme vyhráli 4:0.
+                                <span class="block text-sm font-medium text-white/65 mt-1">Rozhodující gól dal Kuba, Vojta přidal tři asistence. Sezóna: 4 výhry a 1 prohra, skóre 37:14. <button type="button" data-tab="matches" class="underline underline-offset-4 hover:text-white">Průběh gólů</button> a <button type="button" data-tab="players" class="underline underline-offset-4 hover:text-white">statistiky hráčů</button>.</span>
                             </p>
                             <div class="mt-7 flex flex-wrap items-center gap-3">
                                 <button type="button" data-tab="matches" class="pill rounded-full px-5 py-2.5 text-sm font-semibold inline-flex items-center gap-2">
@@ -278,9 +278,9 @@
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                     <div>
                         <p class="font-display font-extrabold uppercase text-xs tracking-[.2em] text-bright flex items-center gap-2">
-                            <span class="inline-block w-2 h-2 rounded-full bg-bright animate-pulse"></span> Další zápas
+                            <span class="inline-block w-2 h-2 rounded-full bg-bright animate-pulse"></span> Další zápas<span id="nextMatchOpponent"> proti SK Ovados C</span>
                         </p>
-                        <p id="nextMatchDate" class="font-display font-extrabold text-2xl sm:text-3xl mt-2">3. 11. 2026 &middot; 18:00</p>
+                        <p id="nextMatchDate" class="font-display font-extrabold text-2xl sm:text-3xl mt-2">11. 11. 2026 &middot; 18:00</p>
                         <p id="nextMatchState" class="text-sm text-white/65 mt-1">Do výkopu zbývá</p>
                     </div>
                     <div class="flipclock flex items-start gap-3 sm:gap-5 self-start lg:self-auto" id="flipClock" role="timer" aria-live="off">
@@ -499,7 +499,7 @@
                                     <li><b class="text-navy">&times;1,0 Standard:</b> běžná účast v hospodě, body z hřiště zůstávají</li>
                                     <li><b class="text-navy">&times;1,5 Aktivní Šmakec:</b> 6+ piv NEBO 4 panáky zelené</li>
                                     <li><b class="text-navy">&times;2,0 Ultrašmakec (Fenin Mode):</b> 8+ piv NEBO série 6 panáků zelené za večer</li>
-                                    <li><b class="text-navy">Pokuta &minus;4 body:</b> odchod domů bez návštěvy hospody, odečítá se až od celkového výsledku</li>
+                                    <li><b class="text-navy">Pokuta &minus;4 body:</b> odchod domů bez návštěvy hospody, odečítá se až od celkového výsledku a jen za zápasy, kterých se hráč zúčastnil</li>
                                 </ul>
                             </div>
                         </div>
@@ -685,6 +685,23 @@
                     { score: "4:9", against: true, onIce: ["Vojta", "Kuba", "Raďas", "Patrik"] },
                     { score: "4:10", against: true, onIce: ["Mára", "Patrik", "Jurgi", "Tůmič"] }
                 ]
+            },
+            {
+                date: "Zápas 5", home: "Kaštánci", away: "Ostré kulky", scoreHome: 8, scoreAway: 3, note: "Poločas 4:0", half: "4:0",
+                goalies: ["Hákáč"],
+                events: [
+                    { score: "1:0", scorer: "Dan", assist: "Vojta", onIce: ["Dave", "Tůmič"] },
+                    { score: "2:0", scorer: "Tůmič", assist: "Smrky", onIce: ["Kuba", "Dan"] },
+                    { score: "3:0", scorer: "Tůmič", assist: "Dave", onIce: ["Vojta", "Kuba"] },
+                    { score: "4:0", scorer: "Kuba", assist: "Vojta", onIce: ["Jurgi", "Raďas"] },
+                    { score: "4:1", against: true, onIce: ["Luboš", "Dan", "Jurgi", "Raďas"] },
+                    { score: "4:2", against: true, onIce: ["Smrky", "Kuba", "Dave", "Vojta"] },
+                    { score: "5:2", scorer: "Kuba", assist: "Dave", onIce: ["Luboš", "Smrky"] },
+                    { score: "6:2", scorer: "Tůmič", assist: "Jurgi", onIce: ["Raďas", "Dave"] },
+                    { score: "6:3", against: true, onIce: ["Tůmič", "Kuba", "Dan", "Raďas"] },
+                    { score: "7:3", scorer: "Tůmič", assist: "Smrky", onIce: ["Jurgi", "Dave"] },
+                    { score: "8:3", scorer: "Smrky", assist: "Vojta", onIce: ["Dan", "Kuba"] }
+                ]
             }
         ];
 
@@ -694,18 +711,19 @@
         const canon = n => PLAYER_ALIASES[n] || n;
 
         // Třetí poločas po zápasech: { číslo zápasu: 'standard' | 'active' | 'ultra' | 'none' }
-        //   standard = x1,0 · active = Aktivní Šmakec x1,5 · ultra = Ultrašmakec x2,0 · none = domů bez hospody (-4)
+        //   standard = x1,0 · active = Aktivní Šmakec x1,5 · ultra = Ultrašmakec x2,0 · none = domů bez hospody (-4, jen za zápas, kterého se hráč zúčastnil)
         // Bez záznamu = standard.
         const PUB = {
             'Raďas': { 2: 'active', 3: 'none' },
             'Luboš': { 1: 'ultra', 3: 'ultra' },
-            'Tůmič': { 1: 'none', 2: 'none', 3: 'none' },
+            'Tůmič': { 1: 'none', 2: 'none', 3: 'none', 5: 'none' },
             'Řízek': { 1: 'none', 2: 'none', 3: 'none', 4: 'none' },
             'Jurgi': { 3: 'ultra' },
             'Dave': { 3: 'ultra' },
             'Dan': { 3: 'ultra' },
-            'Vojta': { 3: 'ultra' },
-            'Kuba': { 3: 'ultra' }
+            'Vojta': { 3: 'ultra', 5: 'none' },
+            'Kuba': { 3: 'ultra' },
+            'Hákáč': { 5: 'none' }
         };
 
         // Rozhodující gól: (góly soupeře + 1). gól vítěze
@@ -845,7 +863,7 @@
                 value += perMatch[no];
                 mult = Math.max(mult, TIER_MULT[t]);
             });
-            const penalty = SMAKEC.penalty * pubCount(p, 'none');
+            const penalty = SMAKEC.penalty * Object.entries(pub).filter(([no, t]) => t === 'none' && p.byMatch[no]).length;
             return { value: Math.round((value - penalty) * 10) / 10, mult, penalty, perMatch };
         }
 
@@ -1144,8 +1162,9 @@
             });
         }
 
-        // ---- Odpočet do dalšího zápasu (3. 11. 2026, 18:00 pražského času, zimní čas = +01:00) ----
-        const NEXT_MATCH = new Date('2026-11-03T18:00:00+01:00');
+        // ---- Odpočet do dalšího zápasu (11. 11. 2026, 18:00 pražského času, zimní čas = +01:00) ----
+        const NEXT_MATCH = new Date('2026-11-11T18:00:00+01:00');
+        const NEXT_OPPONENT = 'SK Ovados C';
         const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
         function createDigit(value) {
@@ -1209,6 +1228,7 @@
             if (Date.now() > NEXT_MATCH.getTime() + 3 * 3600 * 1000) {
                 const clock = document.getElementById('flipClock');
                 if (clock) clock.hidden = true;
+                setText('nextMatchOpponent', '');
                 setText('nextMatchDate', 'Termín zatím neznáme');
                 setText('nextMatchState', 'Další zápas zatím nebyl vyhlášen.');
                 return true;
@@ -1241,6 +1261,7 @@
                     dateEl.textContent = day.charAt(0).toUpperCase() + day.slice(1) + ' \u00b7 ' + time;
                 } catch (e) {}
             }
+            setText('nextMatchOpponent', ' proti ' + NEXT_OPPONENT);
             if (tickCountdown()) return;
             const timer = setInterval(() => { if (tickCountdown()) clearInterval(timer); }, 250);
         }
