@@ -1116,29 +1116,113 @@
             setText('smakecAvgValue', `${formatNumber(max)} bodů na zápas`);
         }
 
+        // Šmakec index hráče za jeden zápas (po násobiči a pokutě); součet za zápasy dává celkový index
+        function smakecInMatch(p, no) {
+            const tier = (p.pub || {})[no] || 'standard';
+            const mult = TIER_MULT[tier];
+            const penalty = tier === 'none' ? SMAKEC.penalty : 0;
+            return { value: Math.round((matchBase(p.byMatch[no]) * mult - penalty) * 10) / 10, mult, penalty };
+        }
+
+        // brankář, který chytal při daném gólu
+        function goalieOfEvent(m, e) {
+            const st = goalieStints(m).find(x => x.events.includes(e));
+            return st ? st.name : null;
+        }
+
+        function roleChip(label, names, kind) {
+            const kinds = {
+                scorer: 'bg-royal text-white',
+                assist: 'bg-navy text-white',
+                field: 'bg-mist text-royal',
+                goalie: 'border border-slate-300 text-slate-500'
+            };
+            return `<span class="inline-flex items-baseline gap-1.5"><span class="text-[10px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-full ${kinds[kind]}">${label}</span><span class="text-sm ${kind === 'scorer' ? 'font-extrabold text-navy' : 'text-slate-700'}">${names}</span></span>`;
+        }
+
+        // průběh gólů: kdo byl u každého gólu a v jaké roli
+        function renderGoalLog(m) {
+            const decisive = decisiveEvent(m);
+            return m.events.map(e => {
+                const gk = goalieOfEvent(m, e);
+                const field = e.onIce.length ? roleChip('V poli', e.onIce.map(canon).join(', '), 'field') : '';
+                const chips = e.against
+                    ? [roleChip('V poli', e.onIce.map(canon).join(', '), 'field')]
+                    : [
+                        roleChip('Střelec', canon(e.scorer), 'scorer') + (e === decisive ? ' <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-navy text-white">rozhodující</span>' : ''),
+                        e.assist ? roleChip('Asistent', canon(e.assist), 'assist') : '<span class="text-xs text-slate-400">bez asistence</span>',
+                        field
+                    ];
+                if (gk) chips.push(roleChip('Brankář', gk, 'goalie'));
+                return `
+                    <li class="py-2.5 border-b border-slate-100 last:border-0 flex flex-col sm:flex-row sm:items-baseline gap-x-4 gap-y-1.5">
+                        <span class="sm:w-28 shrink-0 flex items-baseline gap-2">
+                            <span class="font-display font-extrabold ${e.against ? 'text-navy' : 'text-royal'}">${e.score}</span>
+                            <span class="text-[10px] uppercase font-bold ${e.against ? 'text-slate-400' : 'text-royal'}">${e.against ? 'inkasovaný' : 'vstřelený'}</span>
+                        </span>
+                        <span class="flex flex-wrap items-baseline gap-x-4 gap-y-1.5">${chips.join('')}</span>
+                    </li>`;
+            }).join('');
+        }
+
+        // tabulka hráčů za jeden zápas (stejné sloupce jako celková tabulka)
+        function renderMatchTable(no) {
+            const rows = playersData
+                .filter(p => p.byMatch[no])
+                .map(p => ({ p, l: p.byMatch[no], sm: smakecInMatch(p, no) }))
+                .sort((a, b) => b.sm.value - a.sm.value || (b.l.goals + b.l.assists) - (a.l.goals + a.l.assists))
+                .map(({ p, l, sm }) => {
+                    const tag = l.gkHalves ? `<span class="block sm:inline w-fit mt-0.5 sm:mt-0 sm:ml-2 text-[10px] font-bold px-1.5 py-0.5 rounded-full border border-royal text-royal">v brance ${l.gkHalves} pol.</span>` : '';
+                    const badges = (sm.mult !== 1 ? `<span class="ml-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-royal text-white">\u00d7${formatNumber(sm.mult)}</span>` : '')
+                        + (sm.penalty ? `<span class="ml-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-navy text-white">\u2212${sm.penalty}</span>` : '');
+                    return `
+                        <tr class="border-b border-slate-100 last:border-0">
+                            <td class="py-2 pr-2 sm:pr-3 font-extrabold text-navy sm:whitespace-nowrap">${p.name}${tag}</td>
+                            <td class="py-2 px-1.5 sm:px-2 text-center font-bold text-royal">${l.field ? l.goals : dash}</td>
+                            <td class="py-2 px-1.5 sm:px-2 text-center font-bold text-navy">${l.field ? l.assists : dash}</td>
+                            <td class="py-2 px-1.5 sm:px-2 text-center font-bold text-navy">${l.field ? formatPlusMinus(l.plusMinus) : dash}</td>
+                            <td class="py-2 pl-1.5 sm:pl-2 text-right whitespace-nowrap"><span class="font-display font-black text-navy">${formatNumber(sm.value)}</span>${badges}</td>
+                        </tr>`;
+                }).join('');
+            return `
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left text-slate-700">
+                        <thead class="text-[10px] uppercase tracking-wider text-slate-500 border-b border-slate-200">
+                            <tr>
+                                <th class="py-2 pr-3">Hráč</th>
+                                <th class="py-2 px-1.5 sm:px-2 text-center">Góly</th>
+                                <th class="py-2 px-1.5 sm:px-2 text-center">Asist.</th>
+                                <th class="py-2 px-1.5 sm:px-2 text-center">+/-</th>
+                                <th class="py-2 pl-1.5 sm:pl-2 text-right"><span class="hidden sm:inline">Šmakec index</span><span class="sm:hidden">Šmakec</span></th>
+                            </tr>
+                        </thead>
+                        <tbody>${rows}</tbody>
+                    </table>
+                </div>`;
+        }
+
         function renderMatches() {
             const container = document.getElementById('matchesContainer');
             if (!container) return;
             container.innerHTML = '';
 
-            matchesData.forEach(m => {
+            matchesData.forEach((m, i) => {
                 const diff = m.scoreHome - m.scoreAway;
                 const result = diff > 0 ? ['Výhra', 'bg-royal'] : diff < 0 ? ['Prohra', 'bg-navy'] : ['Remíza', 'bg-slate-400'];
-                const decisive = decisiveEvent(m);
                 const goalsFor = m.events ? m.events.filter(e => !e.against).length : 0;
                 const goalsAgainst = m.events ? m.events.filter(e => e.against).length : 0;
 
-                let log = '';
+                let detail = '';
                 if (m.events) {
-                    const rows = m.events.map(e => e.against
-                        ? `<li class="flex items-baseline gap-3"><span class="font-display font-extrabold text-navy w-12 shrink-0">${e.score}</span><span class="text-slate-500">Gól soupeře</span></li>`
-                        : `<li class="flex items-baseline gap-3"><span class="font-display font-extrabold text-royal w-12 shrink-0">${e.score}</span><span><b class="text-navy">${canon(e.scorer)}</b>${e.assist ? ` <span class="text-slate-500">(${canon(e.assist)})</span>` : ''}${e === decisive ? ' <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-navy text-white">rozhodující</span>' : ''}</span></li>`
-                    ).join('');
-                    log = `
+                    detail = `
                         <details class="mt-4 pt-4 border-t border-slate-100">
-                            <summary class="cursor-pointer text-xs font-bold uppercase tracking-wide text-royal">Zápis zápasu &middot; ${goalsFor} ${plural(goalsFor, 'gól', 'góly', 'gólů')}, ${goalsAgainst} ${plural(goalsAgainst, 'inkasovaný', 'inkasované', 'inkasovaných')}</summary>
-                            <ul class="mt-3 space-y-1.5 text-sm">${rows}</ul>
-                            ${m.goalies ? `<p class="mt-3 text-xs text-slate-500">${m.goalies.length > 1 ? `Brankáři: ${canon(m.goalies[0])}, ${canon(m.goalies[1])}` : `Brankář: ${canon(m.goalies[0])}`}</p>` : ''}
+                            <summary class="cursor-pointer text-xs font-bold uppercase tracking-wide text-royal">Zápis a statistiky zápasu &middot; ${goalsFor} ${plural(goalsFor, 'gól', 'góly', 'gólů')}, ${goalsAgainst} ${plural(goalsAgainst, 'inkasovaný', 'inkasované', 'inkasovaných')}</summary>
+                            <h3 class="mt-4 font-display font-extrabold uppercase text-xs tracking-wider text-navy">Průběh gólů</h3>
+                            <ul class="mt-1">${renderGoalLog(m)}</ul>
+                            ${m.goalies ? `<p class="mt-2 text-xs text-slate-500">${m.goalies.length > 1 ? `Brankáři: ${canon(m.goalies[0])} (do gólu ${m.goalieChange}), ${canon(m.goalies[1])} (po něm)` : `Brankář: ${canon(m.goalies[0])}`}</p>` : ''}
+                            <h3 class="mt-6 mb-2 font-display font-extrabold uppercase text-xs tracking-wider text-navy">Hráči v zápase</h3>
+                            ${renderMatchTable(i + 1)}
+                            <p class="mt-2 text-xs text-slate-500">Šmakec index za zápas je po násobiči a případné pokutě. Součet za všechny zápasy dává celkový index v tabulce Hráči.</p>
                         </details>`;
                 }
 
@@ -1156,7 +1240,7 @@
                             <span class="text-sm font-semibold text-left flex-1 text-slate-600">${m.away}</span>
                         </div>
                         <a href="${TEAM_URL}" target="_blank" rel="noopener noreferrer" class="text-xs font-bold uppercase tracking-wide text-royal hover:text-navy whitespace-nowrap">V lize &#8599;</a>
-                    </div>${log}
+                    </div>${detail}
                 `;
                 container.appendChild(item);
             });
