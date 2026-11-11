@@ -155,11 +155,11 @@
                                 <span id="heroEyebrow">Aktualita</span><span class="text-white/40" aria-hidden="true">|</span><time datetime="2026-11-03">3. listopadu 2026</time>
                             </p>
                             <h1 id="heroTitle" class="mt-4 text-white font-display font-extrabold uppercase text-4xl sm:text-5xl md:text-[42px] lg:text-[46px] leading-[1.08] tracking-tight">
-                                Kaštánci se vrátili k výhrám: Ostré kulky 8:3
+                                Kaštánci se vrátili k výhrám: Ostré kulky 9:3
                             </h1>
                             <p id="heroNote" class="mt-4 text-white/90 text-lg sm:text-xl font-semibold">
                                 Čtyři góly dal Tůmič, který se tak s osmi góly stal nejlepším střelcem sezóny. První poločas jsme vyhráli 4:0.
-                                <span class="block text-sm font-medium text-white/65 mt-1">Rozhodující gól dal Kuba, Vojta přidal tři asistence. Sezóna: 4 výhry a 1 prohra, skóre 37:14. <button type="button" data-tab="matches" class="underline underline-offset-4 hover:text-white">Průběh gólů</button> a <button type="button" data-tab="players" class="underline underline-offset-4 hover:text-white">statistiky hráčů</button>.</span>
+                                <span class="block text-sm font-medium text-white/65 mt-1">Rozhodující gól dal Kuba, Vojta přidal tři asistence. Sezóna: 4 výhry a 1 prohra, skóre 38:14. <button type="button" data-tab="matches" class="underline underline-offset-4 hover:text-white">Průběh gólů</button> a <button type="button" data-tab="players" class="underline underline-offset-4 hover:text-white">statistiky hráčů</button>.</span>
                             </p>
                             <div class="mt-7 flex flex-wrap items-center gap-3">
                                 <button type="button" data-tab="matches" class="pill rounded-full px-5 py-2.5 text-sm font-semibold inline-flex items-center gap-2">
@@ -617,6 +617,7 @@
         // ---------- Zápasy ----------
         // events = zápis zápasu: gól Kaštánků { score, scorer, assist, onIce } (onIce = ostatní hráči v poli, bez střelce a asistenta)
         //          gól soupeře { score, against: true, onIce } (onIce = hráči v poli)
+        //          partial: true = u gólu je znám jen střelec (asistent a hráči v poli chybí, započítá se jen střelci)
         // half = skóre v poločase (podle něj se počítají čistá konta brankáře)
         // goalies = brankáři: jeden chytal celý zápas, dva se vystřídali. goalieChange = skóre gólu, po kterém nastoupil druhý brankář.
         //           Brankářům se +/- nepočítá, jejich statistiky se vedou na odchytané poločasy.
@@ -659,7 +660,7 @@
                     { score: "5:1", scorer: "Karel", assist: "Dan", onIce: ["Raďas", "Vojta"] },
                     { score: "6:1", scorer: "Karel", assist: "Tůmič", onIce: ["Raďas", "Dave"] },
                     { score: "7:1", scorer: "Kuba", assist: "Vojta", onIce: ["Dan", "Tůmič"] },
-                    { score: "8:1", scorer: "Dave", assist: "Vojta", onIce: ["Raďas", "Dan"] },
+                    { score: "8:1", scorer: "Kuba", assist: "Vojta", onIce: ["Raďas", "Dan"] },
                     { score: "9:1", scorer: "Dave", assist: "Tůmič", onIce: ["Jurgi", "Karel"] },
                     { score: "10:1", scorer: "Vojta", assist: "Raďas", onIce: ["Dan", "Karel"] },
                     { score: "11:1", scorer: "Karel", assist: "Vojta", onIce: ["Dan", "Tůmič"] },
@@ -687,7 +688,7 @@
                 ]
             },
             {
-                date: "Zápas 5", home: "Kaštánci", away: "Ostré kulky", scoreHome: 8, scoreAway: 3, note: "Poločas 4:0", half: "4:0",
+                date: "Zápas 5", home: "Kaštánci", away: "Ostré kulky", scoreHome: 9, scoreAway: 3, note: "Poločas 4:0", half: "4:0",
                 goalies: ["Hákáč"],
                 events: [
                     { score: "1:0", scorer: "Dan", assist: "Vojta", onIce: ["Dave", "Tůmič"] },
@@ -700,7 +701,8 @@
                     { score: "6:2", scorer: "Tůmič", assist: "Jurgi", onIce: ["Raďas", "Dave"] },
                     { score: "6:3", against: true, onIce: ["Tůmič", "Kuba", "Dan", "Raďas"] },
                     { score: "7:3", scorer: "Tůmič", assist: "Smrky", onIce: ["Jurgi", "Dave"] },
-                    { score: "8:3", scorer: "Smrky", assist: "Vojta", onIce: ["Dan", "Kuba"] }
+                    { score: "8:3", scorer: "Smrky", assist: "Vojta", onIce: ["Dan", "Kuba"] },
+                    { score: "9:3", scorer: "Smrky", assist: null, onIce: [], partial: true }
                 ]
             }
         ];
@@ -1145,12 +1147,14 @@
             const decisive = decisiveEvent(m);
             return m.events.map(e => {
                 const gk = goalieOfEvent(m, e);
-                const field = e.onIce.length ? roleChip('V poli', e.onIce.map(canon).join(', '), 'field') : '';
+                const field = e.partial
+                    ? '<span class="text-xs text-slate-400">hráči v poli neznámí</span>'
+                    : (e.onIce.length ? roleChip('V poli', e.onIce.map(canon).join(', '), 'field') : '');
                 const chips = e.against
                     ? [roleChip('V poli', e.onIce.map(canon).join(', '), 'field')]
                     : [
                         roleChip('Střelec', canon(e.scorer), 'scorer') + (e === decisive ? ' <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-navy text-white">rozhodující</span>' : ''),
-                        e.assist ? roleChip('Asistent', canon(e.assist), 'assist') : '<span class="text-xs text-slate-400">bez asistence</span>',
+                        e.assist ? roleChip('Asistent', canon(e.assist), 'assist') : '<span class="text-xs text-slate-400">' + (e.partial ? 'asistent neznámý' : 'bez asistence') + '</span>',
                         field
                     ];
                 if (gk) chips.push(roleChip('Brankář', gk, 'goalie'));
