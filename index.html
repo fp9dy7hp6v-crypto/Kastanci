@@ -307,7 +307,7 @@
                             <p>Zápas měl jasný průběh. Kuba otevřel skóre po nahrávce Řízka a vzápětí přidal druhý gól, který se podle klasické definice stal rozhodujícím. Do poločasu vedli Kaštánci 4:0 a Smrky, který chytal celý zápas, měl první poločas bez inkasovaného gólu.</p>
                             <p>Dál se prosadil hlavně Řízek, který vstřelil hattrick (3:0, 5:0 a 6:0) a přidal i asistenci. Kuba skončil se čtyřmi góly a dvěma asistencemi, tedy šesti body, a s bilancí +8 byl podle +/- nejlepším hráčem zápasu. Jurgi se postaral o tři asistence a gól, Vojta dal dva góly a Raďas přidal dvě asistence.</p>
                             <p>Soupeř si na gól počkal až za stavu 9:0. Kaštánci ale hned odpověděli desátým gólem, který vstřelil Vojta po nahrávce Jurgiho.</p>
-                            <p>Ve Šmakec indexu za zápas bral nejvíc Kuba (28 bodů). Řízek do hospody nešel, takže mu přibyla pokuta &minus;4 a zápas skončil na 12 bodech.</p>
+                            <p>Ve Šmakec indexu za zápas se o první místo podělili Kuba a Jurgi (oba 28 bodů), Jurgi s Raďasem navíc zvládli ultrašmakec. Řízek do hospody nešel, takže mu přibyla pokuta &minus;4 a zápas skončil na 12 bodech.</p>
                             <p>Kaštánci mají po sedmi zápasech pět výher a dvě prohry, skóre 50:19 a 15 bodů z 21. Kuba je s deseti góly nejlepším střelcem sezóny a vede i Šmakec index (73), Vojta má na kontě už deset asistencí. Termín dalšího zápasu zatím není vyhlášený.</p>
                         </div>
                     </div>
@@ -321,7 +321,7 @@
                             <div><dt class="text-[11px] font-bold uppercase tracking-wide text-slate-500">Rozhodující gól</dt><dd class="text-navy font-semibold">Kuba (2:0)</dd></div>
                             <div><dt class="text-[11px] font-bold uppercase tracking-wide text-slate-500">Nejlepší +/-</dt><dd class="text-navy font-semibold">Kuba (+8)</dd></div>
                             <div><dt class="text-[11px] font-bold uppercase tracking-wide text-slate-500">Brankář</dt><dd class="text-navy font-semibold">Smrky (1 inkasovaný gól)</dd></div>
-                            <div><dt class="text-[11px] font-bold uppercase tracking-wide text-slate-500">Šmakec index za zápas</dt><dd class="text-navy font-semibold">Kuba 28, Jurgi 14, Řízek 12 (&minus;4)</dd></div>
+                            <div><dt class="text-[11px] font-bold uppercase tracking-wide text-slate-500">Šmakec index za zápas</dt><dd class="text-navy font-semibold">Kuba 28, Jurgi 28 (&times;2), Raďas 20 (&times;2), Řízek 12 (&minus;4)</dd></div>
                         </dl>
                         <button type="button" data-tab="matches" class="mt-5 text-xs font-bold uppercase tracking-wide text-royal hover:text-navy">Zápis zápasu a tabulka hráčů <i class="fa-solid fa-chevron-right text-[9px]"></i></button>
                     </aside>
@@ -774,11 +774,11 @@
         //   standard = x1,0 · active = Aktivní Šmakec x1,5 · ultra = Ultrašmakec x2,0 · none = domů bez hospody (-4, jen za zápas, kterého se hráč zúčastnil)
         // Bez záznamu = standard.
         const PUB = {
-            'Raďas': { 2: 'active', 3: 'none' },
+            'Raďas': { 2: 'active', 3: 'none', 7: 'ultra' },
             'Luboš': { 1: 'ultra', 3: 'ultra' },
             'Tůmič': { 1: 'none', 2: 'none', 3: 'none', 5: 'none' },
             'Řízek': { 1: 'none', 2: 'none', 3: 'none', 4: 'none', 7: 'none' },
-            'Jurgi': { 3: 'ultra' },
+            'Jurgi': { 3: 'ultra', 7: 'ultra' },
             'Dave': { 3: 'ultra' },
             'Dan': { 3: 'ultra' },
             'Vojta': { 3: 'ultra', 5: 'none' },
